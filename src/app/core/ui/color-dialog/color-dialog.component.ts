@@ -3,14 +3,16 @@ import {Button} from "primeng/button";
 import {DialogModule} from "primeng/dialog";
 import {InputTextModule} from "primeng/inputtext";
 import {ColorPickerModule} from "primeng/colorpicker";
-import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {RadioButtonModule} from "primeng/radiobutton";
 import {InputGroupAddonModule} from "primeng/inputgroupaddon";
 import {InputGroupModule} from "primeng/inputgroup";
+import {InputMaskModule} from "primeng/inputmask";
 
 interface Color {
-  label: string,
-  value: string
+  main: string,
+  bottom: string,
+  inner: string
 }
 
 @Component({
@@ -24,7 +26,9 @@ interface Color {
     ReactiveFormsModule,
     RadioButtonModule,
     InputGroupAddonModule,
-    InputGroupModule
+    InputGroupModule,
+    InputMaskModule,
+    FormsModule
   ],
   styleUrl: './color-dialog.component.scss',
   template: `
@@ -37,17 +41,17 @@ interface Color {
               [style]="{ width: '25rem' }">
       <span tabindex="0" class="p-text-secondary block mb-5">Selecciona el conjunto de colores de tu taza.</span>
       <form [formGroup]="colorSelectionFormGroup">
-        <div class="flex align-items-center gap-3 mb-3">
+        <div class="field">
           <label for="cp-hex-main" class="font-semibold w-6rem">Principal</label>
-          <p-colorPicker id="cp-hex-main" formControlName="mainColor" appendTo="body"/>
+          <p-colorPicker id="cp-hex-main" formControlName="mainColor" appendTo="body" styleClass="ml-3"/>
         </div>
-        <div class="flex align-items-center gap-3 mb-3">
+        <div class="field">
           <label for="cp-hex-bottom" class="font-semibold w-6rem">Base</label>
-          <p-colorPicker id="cp-hex-bottom" formControlName="bottomColor" appendTo="body"/>
+          <p-colorPicker id="cp-hex-bottom" formControlName="bottomColor" appendTo="body" styleClass="ml-3"/>
         </div>
-        <div class="flex align-items-center gap-3 mb-5">
+        <div class="field mb-5">
           <label for="cp-hex-bottom" class="font-semibold w-6rem">Interior</label>
-          <p-colorPicker id="cp-hex-inner" formControlName="innerColor" appendTo="body"/>
+          <p-colorPicker id="cp-hex-inner" formControlName="innerColor" appendTo="body" styleClass="ml-3"/>
         </div>
       </form>
       <div class="flex justify-content-end gap-2">
@@ -59,14 +63,19 @@ interface Color {
 })
 export class ColorDialogComponent {
   @Input() isColorSelectionVisible: boolean = false;
-  @Output() hideColorSelectionDialogEvent: EventEmitter<void> = new EventEmitter<void>();
+  @Output() hideColorSelectionDialogEvent: EventEmitter<Color> = new EventEmitter<Color>();
   colorSelectionFormGroup: FormGroup = new FormGroup({
     mainColor: new FormControl('#FFFFFF'),
     bottomColor: new FormControl('#FFFFFF'),
     innerColor: new FormControl('#FFFFFF'),
   });
 
-  onSaveNewColorSelection() {
-    this.hideColorSelectionDialogEvent.emit();
+  get colorObject(): Color {
+    return this.colorSelectionFormGroup.value as Color;
   }
+
+  onSaveNewColorSelection() {
+    this.hideColorSelectionDialogEvent.emit(this.colorObject);
+  }
+
 }
