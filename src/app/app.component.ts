@@ -1,78 +1,132 @@
 import {ApplicationRef, Component, inject, PLATFORM_ID, signal, WritableSignal} from '@angular/core';
-import {RouterOutlet} from '@angular/router';
 import {Button} from "primeng/button";
-import {InputTextModule} from "primeng/inputtext";
-import {SplitButtonModule} from "primeng/splitbutton";
-import {ToolbarModule} from "primeng/toolbar";
 import {FileUploadEvent, FileUploadModule} from "primeng/fileupload";
 import {ColorPickerModule} from "primeng/colorpicker";
-import {FormsModule} from "@angular/forms";
-import {isPlatformBrowser, NgForOf} from "@angular/common";
-import {DialogModule} from "primeng/dialog";
-import {ColorDialogComponent} from "./core/ui/color-dialog/color-dialog.component";
+import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {isPlatformBrowser} from "@angular/common";
 import {first} from "rxjs";
 import {MugComponent} from "./core/ui/mug/mug.component";
+import {SelectButtonModule} from "primeng/selectbutton";
+import {DividerModule} from "primeng/divider";
+import {ChipModule} from "primeng/chip";
+
+interface Movement {
+  label: string,
+  value: boolean
+}
 
 @Component({
+  imports: [
+    DividerModule,
+    Button,
+    SelectButtonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    ChipModule,
+    ColorPickerModule,
+    MugComponent,
+    FileUploadModule
+  ],
   selector: 'app-root',
   standalone: true,
-  imports: [
-    RouterOutlet,
-    Button,
-    InputTextModule,
-    SplitButtonModule,
-    ToolbarModule,
-    FileUploadModule,
-    ColorPickerModule,
-    FormsModule,
-    NgForOf,
-    DialogModule,
-    ColorDialogComponent,
-    MugComponent
-  ],
   styleUrl: './app.component.scss',
   template: `
-    <p-toolbar styleClass="absolute border-noround w-full shadow-1">
-      <div class="p-toolbar-group-start flex flex-wrap gap-2">
-        <p-fileUpload
-          mode="basic"
-          name="demo[]"
-          chooseIcon="pi pi-upload"
-          url="https://www.primefaces.org/cdn/api/upload.php"
-          accept="image/*" maxFileSize="1000000"
-          (onUpload)="onFileUploadAuto($event)"
-          [auto]="true"
-          [chooseLabel]="selectedFile ? selectedFile.name : 'Sube tu diseño'"
-        />
-        <p-button (onClick)="isColorSelectionVisible = true" label="Colorea tu taza"
-                  icon="pi pi-palette"/>
-        <p-button [outlined]="true" icon="pi pi-download" label="Descarga la plantilla"/>
-        <p-button [outlined]="true" severity="danger" label="Borrar diseño" icon="pi pi-trash"/>
-        <app-color-dialog (hideColorSelectionDialogEvent)="isColorSelectionVisible = false"
-                          [isColorSelectionVisible]="_isColorSelectionVisible"></app-color-dialog>
+    <div class="h-screen flex">
+      <div id="app-sidebar"
+           class="surface-section hidden lg:block flex-shrink-0 absolute lg:static left-0 top-0 z-1 select-none shadow-1 p-3"
+           style="width:280px">
+        <p-divider align="left" type="solid">
+          <span class="font-medium">Diseño</span>
+        </p-divider>
+        <div class="flex flex-column gap-2">
+          <p-fileUpload
+            mode="basic"
+            name="demo[]"
+            chooseIcon="pi pi-upload"
+            styleClass="w-full"
+            url="https://www.primefaces.org/cdn/api/upload.php"
+            accept="image/png" maxFileSize="1000000"
+            invalidFileTypeMessageSummary=""
+            invalidFileTypeMessageDetail="Tipo de archivo no permitido. Extensiones permitidas: image/png"
+            invalidFileSizeMessageSummary=""
+            invalidFileSizeMessageDetail="Tamaño de archivo no permitido. Tamaño máximo: 10 MB"
+            (onUpload)="onFileUploadAuto($event)"
+            [auto]="true"
+            [chooseLabel]="selectedFile ?  selectedFile.name : 'Sube tu diseño'"
+          />
+          <p-button label="Descargar plantilla" severity="secondary" styleClass="w-full" icon="pi pi-times"/>
+        </div>
+        <p-divider align="left" type="solid">
+          <span class="font-medium">Movimiento</span>
+        </p-divider>
+        <p-selectButton
+          [options]="movementState"
+          [(ngModel)]="isMugMoving"
+          optionLabel="label"
+          optionValue="value"
+          [allowEmpty]="false"/>
+        <p-divider align="left" type="solid">
+          <span class="font-medium">Color</span>
+        </p-divider>
+        <form [formGroup]="colorSelectionFormGroup">
+          <div class="flex flex-column gap-2">
+            <p-chip styleClass="pl-2 pr-3">
+              <span class="w-2rem h-2rem flex align-items-center justify-content-center">
+                  <p-colorPicker formControlName="mainColor"/>
+              </span>
+              <span class="ml-2 font-medium">
+              Principal
+              </span>
+            </p-chip>
+            <p-chip styleClass="pl-2 pr-3">
+              <span class="w-2rem h-2rem flex align-items-center justify-content-center">
+                  <p-colorPicker formControlName="bottomColor"/>
+              </span>
+              <span class="ml-2 font-medium">
+              Base
+              </span>
+            </p-chip>
+            <p-chip styleClass="pl-2 pr-3">
+              <span class="w-2rem h-2rem flex align-items-center justify-content-center">
+                  <p-colorPicker formControlName="innerColor"/>
+              </span>
+              <span class="ml-2 font-medium">
+              Interior
+              </span>
+            </p-chip>
+          </div>
+          <div class="flex flex-column mt-3">
+            <p-button [disabled]="colorSelectionFormGroup.untouched" label="Aplicar color" styleClass="w-full"
+                      icon="pi pi-palette"/>
+          </div>
+        </form>
       </div>
-    </p-toolbar>
-    <app-mug></app-mug>
+      <div class="max-h-screen flex flex-column flex-auto">
+        <app-mug [isMugMoving]="this.isMugMoving"></app-mug>
+      </div>
+    </div>
   `
 })
 export class AppComponent {
   static isBrowser: WritableSignal<boolean> = signal(false);
   static isStable: WritableSignal<boolean> = signal(false);
   title: string = 'mug-maker';
-  _isColorSelectionVisible: boolean = false;
   selectedFile: File | undefined;
   private platformId: object = inject(PLATFORM_ID);
   private applicationRef: ApplicationRef = inject(ApplicationRef);
+  movementState: Movement[] = [{label: 'Activar', value: true}, {label: 'Desactivar', value: false}];
+  isMugMoving: boolean = true;
+  colorSelectionFormGroup: FormGroup = new FormGroup({
+    mainColor: new FormControl('#FFFFFF'),
+    bottomColor: new FormControl('#FFFFFF'),
+    innerColor: new FormControl('#FFFFFF'),
+  });
 
   constructor() {
     AppComponent.isBrowser.set(isPlatformBrowser(this.platformId));
     this.applicationRef.isStable.pipe(
       first((stable: boolean) => stable)
     ).subscribe((stable: boolean) => AppComponent.isStable.set(stable));
-  }
-
-  set isColorSelectionVisible(value: boolean) {
-    this._isColorSelectionVisible = value;
   }
 
   onFileUploadAuto($event: FileUploadEvent): void {

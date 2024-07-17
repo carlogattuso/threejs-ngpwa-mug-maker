@@ -1,6 +1,6 @@
-import {Component, effect, ElementRef, inject, Renderer2, ViewChild} from '@angular/core';
+import {Component, effect, ElementRef, inject, Input, Renderer2, ViewChild} from '@angular/core';
 import {AppComponent} from "../../../app.component";
-import {AmbientLight, DirectionalLight, PerspectiveCamera, Scene, WebGLRenderer} from "three";
+import {AmbientLight, DirectionalLight, Object3D, PerspectiveCamera, Scene, WebGLRenderer} from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls.js";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader.js";
 import {ThreeUtility} from "../../../utility/three.utility";
@@ -11,7 +11,7 @@ import {ThreeUtility} from "../../../utility/three.utility";
   imports: [],
   styleUrl: './mug.component.scss',
   template: `
-    <canvas #canvas class="h-full w-full"></canvas>
+    <canvas #canvas class="h-screen w-full"></canvas>
   `
 })
 export class MugComponent {
@@ -25,6 +25,7 @@ export class MugComponent {
   @ViewChild('canvas') canvas!: ElementRef;
   canvasElement!: HTMLElement;
   private renderer: Renderer2 = inject(Renderer2);
+  @Input() isMugMoving: boolean = true;
 
   constructor() {
     effect((): void => {
@@ -79,6 +80,12 @@ export class MugComponent {
 
   animate(): void {
     requestAnimationFrame(this.animate.bind(this));
+    if (this.isMugMoving) {
+      const mug: Object3D | undefined = this.scene.getObjectByName('Coffee-Mug_1');
+      const mugContent: Object3D | undefined = this.scene.getObjectByName('Coffee-Mug_2');
+      if (mug) mug.rotation.y += 0.01;
+      if (mugContent) mugContent.rotation.y += 0.01;
+    }
     this.render();
   }
 

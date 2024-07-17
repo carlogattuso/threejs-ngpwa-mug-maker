@@ -27,8 +27,8 @@ export class ThreeUtility {
         .load(path,
           async (model: GLTF): Promise<void> => {
             const texture: CanvasTexture = await this.loadTexture('glb/sopra.jpg');
-            const material1: MeshPhysicalMaterial = (model.scene.getObjectById(16) as Mesh).material as MeshPhysicalMaterial;
-            const material2: MeshPhysicalMaterial = (model.scene.getObjectById(17) as Mesh).material as MeshPhysicalMaterial;
+            const material1: MeshPhysicalMaterial = (model.scene.getObjectByName('Coffee-Mug_1') as Mesh).material as MeshPhysicalMaterial;
+            const material2: MeshPhysicalMaterial = (model.scene.getObjectByName('Coffee-Mug_2') as Mesh).material as MeshPhysicalMaterial;
             material1.map!.image = texture.image;
             material1.needsUpdate = true;
             material2.map!.image = texture.image;
