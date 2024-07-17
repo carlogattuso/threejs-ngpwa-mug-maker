@@ -3,7 +3,7 @@ import {Button} from "primeng/button";
 import {FileUploadEvent, FileUploadModule} from "primeng/fileupload";
 import {ColorPickerModule} from "primeng/colorpicker";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {isPlatformBrowser} from "@angular/common";
+import {isPlatformBrowser, NgForOf} from "@angular/common";
 import {first} from "rxjs";
 import {MugComponent} from "./core/ui/mug/mug.component";
 import {SelectButtonModule} from "primeng/selectbutton";
@@ -25,7 +25,8 @@ interface Movement {
     ChipModule,
     ColorPickerModule,
     MugComponent,
-    FileUploadModule
+    FileUploadModule,
+    NgForOf
   ],
   selector: 'app-root',
   standalone: true,
@@ -54,7 +55,7 @@ interface Movement {
             [auto]="true"
             [chooseLabel]="selectedFile ?  selectedFile.name : 'Sube tu diseño'"
           />
-          <p-button label="Descargar plantilla" severity="secondary" styleClass="w-full" icon="pi pi-times"/>
+          <p-button label="Descargar plantilla" severity="secondary" styleClass="w-full" icon="pi pi-download"/>
         </div>
         <p-divider align="left" type="solid">
           <span class="font-medium">Movimiento</span>
@@ -69,7 +70,7 @@ interface Movement {
           <span class="font-medium">Color</span>
         </p-divider>
         <form [formGroup]="colorSelectionFormGroup">
-          <div class="flex flex-column gap-2">
+          <div class="flex flex-wrap gap-2">
             <p-chip styleClass="pl-2 pr-3">
               <span class="w-2rem h-2rem flex align-items-center justify-content-center">
                   <p-colorPicker formControlName="mainColor"/>
@@ -94,10 +95,27 @@ interface Movement {
               Interior
               </span>
             </p-chip>
+            <p-chip styleClass="pl-2 pr-3">
+              <span class="w-2rem h-2rem flex align-items-center justify-content-center">
+                  <p-colorPicker formControlName="bevelColor"/>
+              </span>
+              <span class="ml-2 font-medium">
+              Borde
+              </span>
+            </p-chip>
           </div>
-          <div class="flex flex-column mt-3">
+          <div class="flex flex-column gap-2 mt-3">
             <p-button [disabled]="colorSelectionFormGroup.untouched" label="Aplicar color" styleClass="w-full"
                       icon="pi pi-palette"/>
+            <p-button [disabled]="colorSelectionFormGroup.untouched" severity="secondary" label="Restablecer colores"
+                      styleClass="w-full"
+                      icon="pi pi-eraser"
+                      (click)="colorSelectionFormGroup.reset({
+                        mainColor: '#FFFFFF',
+                        bottomColor: '#FFFFFF',
+                        innerColor: '#FFFFFF',
+                        bevelColor: '#FFFFFF'
+                      })"/>
           </div>
         </form>
       </div>
@@ -120,6 +138,7 @@ export class AppComponent {
     mainColor: new FormControl('#FFFFFF'),
     bottomColor: new FormControl('#FFFFFF'),
     innerColor: new FormControl('#FFFFFF'),
+    bevelColor: new FormControl('#FFFFFF')
   });
 
   constructor() {
