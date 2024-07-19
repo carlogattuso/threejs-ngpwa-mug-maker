@@ -1,4 +1,4 @@
-import {ApplicationRef, Component, inject, PLATFORM_ID, signal, WritableSignal} from '@angular/core';
+import {ApplicationRef, Component, inject, PLATFORM_ID, signal, ViewChild, WritableSignal} from '@angular/core';
 import {Button} from "primeng/button";
 import {FileUploadEvent, FileUploadModule} from "primeng/fileupload";
 import {ColorPickerModule} from "primeng/colorpicker";
@@ -73,15 +73,17 @@ interface Movement {
           <div class="flex flex-wrap gap-2">
             <p-chip styleClass="pl-2 pr-3">
               <span class="w-2rem h-2rem flex align-items-center justify-content-center">
-                  <p-colorPicker formControlName="mainColor"/>
+                  <p-colorPicker formControlName="handleColor"
+                                 (onChange)="mugComponent.updateMaterial(mugComponent.handleMaterial, $event)"/>
               </span>
               <span class="ml-2 font-medium">
-              Principal
+              Agarre
               </span>
             </p-chip>
             <p-chip styleClass="pl-2 pr-3">
               <span class="w-2rem h-2rem flex align-items-center justify-content-center">
-                  <p-colorPicker formControlName="bottomColor"/>
+                  <p-colorPicker formControlName="baseColor"
+                                 (onChange)="mugComponent.updateMaterial(mugComponent.baseMaterial, $event)"/>
               </span>
               <span class="ml-2 font-medium">
               Base
@@ -89,7 +91,8 @@ interface Movement {
             </p-chip>
             <p-chip styleClass="pl-2 pr-3">
               <span class="w-2rem h-2rem flex align-items-center justify-content-center">
-                  <p-colorPicker formControlName="innerColor"/>
+                  <p-colorPicker formControlName="innerColor"
+                                 (onChange)="mugComponent.updateMaterial(mugComponent.innerMaterial, $event)"/>
               </span>
               <span class="ml-2 font-medium">
               Interior
@@ -97,25 +100,13 @@ interface Movement {
             </p-chip>
             <p-chip styleClass="pl-2 pr-3">
               <span class="w-2rem h-2rem flex align-items-center justify-content-center">
-                  <p-colorPicker formControlName="bevelColor"/>
+                  <p-colorPicker formControlName="bevelColor"
+                                 (onChange)="mugComponent.updateMaterial(mugComponent.bevelMaterial, $event)"/>
               </span>
               <span class="ml-2 font-medium">
               Borde
               </span>
             </p-chip>
-          </div>
-          <div class="flex flex-column gap-2 mt-3">
-            <p-button [disabled]="colorSelectionFormGroup.untouched" label="Aplicar color" styleClass="w-full"
-                      icon="pi pi-palette"/>
-            <p-button [disabled]="colorSelectionFormGroup.untouched" severity="secondary" label="Restablecer colores"
-                      styleClass="w-full"
-                      icon="pi pi-eraser"
-                      (click)="colorSelectionFormGroup.reset({
-                        mainColor: '#FFFFFF',
-                        bottomColor: '#FFFFFF',
-                        innerColor: '#FFFFFF',
-                        bevelColor: '#FFFFFF'
-                      })"/>
           </div>
         </form>
       </div>
@@ -135,11 +126,12 @@ export class AppComponent {
   movementState: Movement[] = [{label: 'Activar', value: true}, {label: 'Desactivar', value: false}];
   isMugMoving: boolean = true;
   colorSelectionFormGroup: FormGroup = new FormGroup({
-    mainColor: new FormControl('#FFFFFF'),
-    bottomColor: new FormControl('#FFFFFF'),
+    handleColor: new FormControl('#FFFFFF'),
+    baseColor: new FormControl('#FFFFFF'),
     innerColor: new FormControl('#FFFFFF'),
     bevelColor: new FormControl('#FFFFFF')
   });
+  @ViewChild(MugComponent) mugComponent!: MugComponent;
 
   constructor() {
     AppComponent.isBrowser.set(isPlatformBrowser(this.platformId));

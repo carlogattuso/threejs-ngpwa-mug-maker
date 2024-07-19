@@ -1,9 +1,20 @@
 import {Component, effect, ElementRef, inject, Input, Renderer2, ViewChild} from '@angular/core';
 import {AppComponent} from "../../../app.component";
-import {AmbientLight, DirectionalLight, Object3D, PerspectiveCamera, Scene, WebGLRenderer} from "three";
+import {
+  AmbientLight,
+  DirectionalLight,
+  Mesh,
+  MeshPhysicalMaterial,
+  Object3D,
+  PerspectiveCamera,
+  Scene,
+  SRGBColorSpace,
+  WebGLRenderer
+} from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls.js";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader.js";
 import {ThreeUtility} from "../../../utility/three.utility";
+import {ColorPickerChangeEvent} from "primeng/colorpicker";
 
 @Component({
   selector: 'app-mug',
@@ -22,6 +33,11 @@ export class MugComponent {
   directionalLight: DirectionalLight = new DirectionalLight(0xffffff, 2.75);
   webGLRenderer?: WebGLRenderer;
   controls?: OrbitControls;
+  logoMaterial?: MeshPhysicalMaterial;
+  baseMaterial?: MeshPhysicalMaterial;
+  innerMaterial?: MeshPhysicalMaterial;
+  bevelMaterial?: MeshPhysicalMaterial;
+  handleMaterial?: MeshPhysicalMaterial;
   @ViewChild('canvas') canvas!: ElementRef;
   canvasElement!: HTMLElement;
   private renderer: Renderer2 = inject(Renderer2);
@@ -73,8 +89,12 @@ export class MugComponent {
      */
 
     const mug: GLTF = await ThreeUtility.loadModel('glb/mug.glb');
-    this.scene.add(mug.scene);
+    this.baseMaterial = (mug.scene.getObjectByName('Coffee-Mug_3') as Mesh).material as MeshPhysicalMaterial;
+    this.bevelMaterial = (mug.scene.getObjectByName('Coffee-Mug_4') as Mesh).material as MeshPhysicalMaterial;
+    this.innerMaterial = (mug.scene.getObjectByName('Coffee-Mug_5') as Mesh).material as MeshPhysicalMaterial;
+    this.handleMaterial = (mug.scene.getObjectByName('Coffee-Mug_6') as Mesh).material as MeshPhysicalMaterial;
 
+    this.scene.add(mug.scene);
     this.animate();
   }
 
@@ -86,6 +106,7 @@ export class MugComponent {
     }
     this.render();
   }
+
 
   render(): void {
     if (this.canvas)
@@ -99,4 +120,11 @@ export class MugComponent {
     this.webGLRenderer?.setSize(width, height);
   }
 
+  updateMaterial(material: MeshPhysicalMaterial | undefined, event: ColorPickerChangeEvent) {
+    const colorRGB: number = parseInt(String(event.value).replace("#", "0x"), 16);
+    if (material) {
+      material.color.setHex(colorRGB, SRGBColorSpace);
+      material.needsUpdate = true;
+    }
+  }
 }
