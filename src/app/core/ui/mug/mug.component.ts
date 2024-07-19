@@ -81,10 +81,8 @@ export class MugComponent {
   animate(): void {
     requestAnimationFrame(this.animate.bind(this));
     if (this.isMugMoving) {
-      const mug: Object3D | undefined = this.scene.getObjectByName('Coffee-Mug_1');
-      const mugContent: Object3D | undefined = this.scene.getObjectByName('Coffee-Mug_2');
+      const mug: Object3D | undefined = this.scene.getObjectByName('Coffee-Mug');
       if (mug) mug.rotation.y += 0.01;
-      if (mugContent) mugContent.rotation.y += 0.01;
     }
     this.render();
   }
