@@ -1,4 +1,13 @@
-import {ApplicationRef, Component, inject, PLATFORM_ID, signal, ViewChild, WritableSignal} from '@angular/core';
+import {
+  ApplicationRef,
+  Component,
+  inject,
+  PLATFORM_ID,
+  Renderer2,
+  signal,
+  ViewChild,
+  WritableSignal
+} from '@angular/core';
 import {Button} from "primeng/button";
 import {FileUploadEvent, FileUploadModule} from "primeng/fileupload";
 import {ColorPickerModule} from "primeng/colorpicker";
@@ -55,7 +64,8 @@ interface Movement {
             [auto]="true"
             [chooseLabel]="selectedFile ?  selectedFile.name : 'Sube tu diseño'"
           />
-          <p-button label="Descargar plantilla" severity="secondary" styleClass="w-full" icon="pi pi-download"/>
+          <p-button label="Descargar plantilla" severity="secondary" styleClass="w-full" icon="pi pi-download"
+                    (click)="downloadTemplate()"/>
         </div>
         <p-divider align="left" type="solid">
           <span class="font-medium">Movimiento</span>
@@ -132,6 +142,7 @@ export class AppComponent {
     bevelColor: new FormControl('#FFFFFF')
   });
   @ViewChild(MugComponent) mugComponent!: MugComponent;
+  private renderer: Renderer2 = inject(Renderer2);
 
   constructor() {
     AppComponent.isBrowser.set(isPlatformBrowser(this.platformId));
@@ -142,6 +153,22 @@ export class AppComponent {
 
   onFileUploadAuto($event: FileUploadEvent): void {
     this.selectedFile = $event.files[0];
+    const reader: FileReader = new FileReader();
+
+    reader.addEventListener("load", (): void => {
+      this.mugComponent.setLogo(reader.result as string);
+    }, false);
+
+    if (this.selectedFile) {
+      reader.readAsDataURL(this.selectedFile);
+    }
+  }
+
+  downloadTemplate(): void {
+    const anchorElement: HTMLAnchorElement = this.renderer.createElement('a');
+    this.renderer.setAttribute(anchorElement, 'href', 'glb/logo.png');
+    this.renderer.setAttribute(anchorElement, 'download', 'logo.png');
+    anchorElement.click();
   }
 
 }

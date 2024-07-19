@@ -89,6 +89,7 @@ export class MugComponent {
      */
 
     const mug: GLTF = await ThreeUtility.loadModel('glb/mug.glb');
+    this.logoMaterial = (mug.scene.getObjectByName('Coffee-Mug_1') as Mesh).material as MeshPhysicalMaterial;
     this.baseMaterial = (mug.scene.getObjectByName('Coffee-Mug_3') as Mesh).material as MeshPhysicalMaterial;
     this.bevelMaterial = (mug.scene.getObjectByName('Coffee-Mug_4') as Mesh).material as MeshPhysicalMaterial;
     this.innerMaterial = (mug.scene.getObjectByName('Coffee-Mug_5') as Mesh).material as MeshPhysicalMaterial;
@@ -118,6 +119,14 @@ export class MugComponent {
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
     this.webGLRenderer?.setSize(width, height);
+  }
+
+  async setLogo(texture: string) {
+    if (this.logoMaterial) {
+      this.logoMaterial.map = await ThreeUtility.loadTexture(texture);
+      this.logoMaterial.map.flipY = false;
+      this.logoMaterial.needsUpdate = true;
+    }
   }
 
   updateMaterial(material: MeshPhysicalMaterial | undefined, event: ColorPickerChangeEvent) {
