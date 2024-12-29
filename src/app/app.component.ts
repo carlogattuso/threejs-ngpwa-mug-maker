@@ -1,6 +1,7 @@
 import {
   ApplicationRef,
   Component,
+  computed,
   inject,
   PLATFORM_ID,
   Renderer2,
@@ -12,14 +13,15 @@ import {Button} from "primeng/button";
 import {FileUploadEvent, FileUploadModule} from "primeng/fileupload";
 import {ColorPickerModule} from "primeng/colorpicker";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {isPlatformBrowser, NgForOf} from "@angular/common";
+import {isPlatformBrowser, Location, NgForOf} from "@angular/common";
 import {first} from "rxjs";
-import {MugComponent} from "./core/ui/mug/mug.component";
+import {MugComponent} from "./mug/mug.component";
 import {SelectButtonModule} from "primeng/selectbutton";
 import {DividerModule} from "primeng/divider";
 import {ChipModule} from "primeng/chip";
+import {DefaultLogoFilename, DefaultLogoPath} from "./app.constants";
 
-interface Movement {
+interface Rotation {
   label: string,
   value: boolean
 }
@@ -46,7 +48,7 @@ interface Movement {
            class="surface-section hidden lg:block flex-shrink-0 absolute lg:static left-0 top-0 z-1 select-none shadow-1 p-3"
            style="width:280px">
         <p-divider align="left" type="solid">
-          <span class="font-medium">Diseño</span>
+          <span class="font-medium">Design</span>
         </p-divider>
         <div class="flex flex-column gap-2">
           <p-fileUpload
@@ -55,23 +57,23 @@ interface Movement {
             chooseIcon="pi pi-upload"
             styleClass="w-full"
             url="https://www.primefaces.org/cdn/api/upload.php"
-            accept="image/png" maxFileSize="1000000"
+            accept="image/png" maxFileSize="10000000"
             invalidFileTypeMessageSummary=""
-            invalidFileTypeMessageDetail="Tipo de archivo no permitido. Extensiones permitidas: image/png"
+            invalidFileTypeMessageDetail="File type not allowed. Allowed extensions: image/png"
             invalidFileSizeMessageSummary=""
-            invalidFileSizeMessageDetail="Tamaño de archivo no permitido. Tamaño máximo: 10 MB"
+            invalidFileSizeMessageDetail="File size not allowed. Maximum size: 10 MB"
             (onUpload)="onFileUploadAuto($event)"
             [auto]="true"
-            [chooseLabel]="selectedFile ?  selectedFile.name : 'Sube tu diseño'"
+            [chooseLabel]="selectedLogoFile ?  selectedLogoFile.name : 'Upload your design'"
           />
-          <p-button label="Descargar plantilla" severity="secondary" styleClass="w-full" icon="pi pi-download"
+          <p-button label="Download template" severity="secondary" styleClass="w-full" icon="pi pi-download"
                     (click)="downloadTemplate()"/>
         </div>
         <p-divider align="left" type="solid">
-          <span class="font-medium">Movimiento</span>
+          <span class="font-medium">Rotation</span>
         </p-divider>
         <p-selectButton
-          [options]="movementState"
+          [options]="mugRotationState"
           [(ngModel)]="isMugMoving"
           optionLabel="label"
           optionValue="value"
@@ -79,21 +81,21 @@ interface Movement {
         <p-divider align="left" type="solid">
           <span class="font-medium">Color</span>
         </p-divider>
-        <form [formGroup]="colorSelectionFormGroup">
+        <form [formGroup]="mugColorsFormGroup">
           <div class="flex flex-wrap gap-2">
             <p-chip styleClass="pl-2 pr-3">
               <span class="w-2rem h-2rem flex align-items-center justify-content-center">
                   <p-colorPicker formControlName="handleColor"
-                                 (onChange)="mugComponent.updateMaterial(mugComponent.handleMaterial, $event)"/>
+                                 (onChange)="mugComponent.updateMaterial('HANDLE', $event)"/>
               </span>
               <span class="ml-2 font-medium">
-              Agarre
+              Handle
               </span>
             </p-chip>
             <p-chip styleClass="pl-2 pr-3">
               <span class="w-2rem h-2rem flex align-items-center justify-content-center">
                   <p-colorPicker formControlName="baseColor"
-                                 (onChange)="mugComponent.updateMaterial(mugComponent.baseMaterial, $event)"/>
+                                 (onChange)="mugComponent.updateMaterial('BASE', $event)"/>
               </span>
               <span class="ml-2 font-medium">
               Base
@@ -101,8 +103,8 @@ interface Movement {
             </p-chip>
             <p-chip styleClass="pl-2 pr-3">
               <span class="w-2rem h-2rem flex align-items-center justify-content-center">
-                  <p-colorPicker formControlName="innerColor"
-                                 (onChange)="mugComponent.updateMaterial(mugComponent.innerMaterial, $event)"/>
+                  <p-colorPicker formControlName="interiorColor"
+                                 (onChange)="mugComponent.updateMaterial('INTERIOR', $event)"/>
               </span>
               <span class="ml-2 font-medium">
               Interior
@@ -111,10 +113,10 @@ interface Movement {
             <p-chip styleClass="pl-2 pr-3">
               <span class="w-2rem h-2rem flex align-items-center justify-content-center">
                   <p-colorPicker formControlName="bevelColor"
-                                 (onChange)="mugComponent.updateMaterial(mugComponent.bevelMaterial, $event)"/>
+                                 (onChange)="mugComponent.updateMaterial('BEVEL', $event)"/>
               </span>
               <span class="ml-2 font-medium">
-              Borde
+              Bevel
               </span>
             </p-chip>
           </div>
@@ -127,22 +129,26 @@ interface Movement {
   `
 })
 export class AppComponent {
-  static isBrowser: WritableSignal<boolean> = signal(false);
-  static isStable: WritableSignal<boolean> = signal(false);
+  static readonly isBrowser: WritableSignal<boolean> = signal(false);
+  static readonly isStable: WritableSignal<boolean> = signal(false);
+  static readonly isReady = computed(() => AppComponent.isBrowser() && AppComponent.isStable());
+
+  private readonly platformId: object = inject(PLATFORM_ID);
+  private readonly applicationRef: ApplicationRef = inject(ApplicationRef);
+
   title: string = 'mug-maker';
-  selectedFile: File | undefined;
-  private platformId: object = inject(PLATFORM_ID);
-  private applicationRef: ApplicationRef = inject(ApplicationRef);
-  movementState: Movement[] = [{label: 'Activar', value: true}, {label: 'Desactivar', value: false}];
+
+  @ViewChild(MugComponent) mugComponent!: MugComponent;
+  mugRotationState: Rotation[] = [{label: 'On', value: true}, {label: 'Off', value: false}];
   isMugMoving: boolean = true;
-  colorSelectionFormGroup: FormGroup = new FormGroup({
+  mugColorsFormGroup: FormGroup = new FormGroup({
     handleColor: new FormControl('#FFFFFF'),
     baseColor: new FormControl('#FFFFFF'),
-    innerColor: new FormControl('#FFFFFF'),
+    interiorColor: new FormControl('#FFFFFF'),
     bevelColor: new FormControl('#FFFFFF')
   });
-  @ViewChild(MugComponent) mugComponent!: MugComponent;
-  private renderer: Renderer2 = inject(Renderer2);
+  selectedLogoFile: File | undefined;
+  private readonly renderer2: Renderer2 = inject(Renderer2);
 
   constructor() {
     AppComponent.isBrowser.set(isPlatformBrowser(this.platformId));
@@ -152,22 +158,22 @@ export class AppComponent {
   }
 
   onFileUploadAuto($event: FileUploadEvent): void {
-    this.selectedFile = $event.files[0];
+    this.selectedLogoFile = $event.files[0];
     const reader: FileReader = new FileReader();
 
     reader.addEventListener("load", (): void => {
       this.mugComponent.setLogo(reader.result as string);
     }, false);
 
-    if (this.selectedFile) {
-      reader.readAsDataURL(this.selectedFile);
+    if (this.selectedLogoFile) {
+      reader.readAsDataURL(this.selectedLogoFile);
     }
   }
 
   downloadTemplate(): void {
-    const anchorElement: HTMLAnchorElement = this.renderer.createElement('a');
-    this.renderer.setAttribute(anchorElement, 'href', 'glb/logo.png');
-    this.renderer.setAttribute(anchorElement, 'download', 'logo.png');
+    const anchorElement: HTMLAnchorElement = this.renderer2.createElement('a');
+    this.renderer2.setAttribute(anchorElement, 'href', Location.joinWithSlash(DefaultLogoPath, DefaultLogoFilename));
+    this.renderer2.setAttribute(anchorElement, 'download', DefaultLogoFilename);
     anchorElement.click();
   }
 
