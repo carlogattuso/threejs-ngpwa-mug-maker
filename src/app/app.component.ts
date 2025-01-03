@@ -45,12 +45,12 @@ interface Rotation {
   template: `
     <div class="h-screen flex">
       <div id="app-sidebar"
-           class="surface-section hidden lg:block flex-shrink-0 absolute lg:static left-0 top-0 z-1 select-none shadow-1 p-3"
+           class="bg-surface-0 dark:bg-surface-950 hidden lg:block shrink-0 absolute lg:static left-0 top-0 z-10 select-none shadow-sm p-4"
            style="width:280px">
         <p-divider align="left" type="solid">
           <span class="font-medium">Design</span>
         </p-divider>
-        <div class="flex flex-column gap-2">
+        <div class="flex flex-col gap-2">
           <p-fileUpload
             mode="basic"
             name="demo[]"
@@ -83,8 +83,8 @@ interface Rotation {
         </p-divider>
         <form [formGroup]="mugColorsFormGroup">
           <div class="flex flex-wrap gap-2">
-            <p-chip styleClass="pl-2 pr-3">
-              <span class="w-2rem h-2rem flex align-items-center justify-content-center">
+            <p-chip styleClass="pl-2 pr-4">
+              <span class="w-8 h-8 flex items-center justify-center">
                   <p-colorPicker formControlName="handleColor"
                                  (onChange)="mugComponent.updateMaterial('HANDLE', $event)"/>
               </span>
@@ -92,8 +92,8 @@ interface Rotation {
               Handle
               </span>
             </p-chip>
-            <p-chip styleClass="pl-2 pr-3">
-              <span class="w-2rem h-2rem flex align-items-center justify-content-center">
+            <p-chip styleClass="pl-2 pr-4">
+              <span class="w-8 h-8 flex items-center justify-center">
                   <p-colorPicker formControlName="baseColor"
                                  (onChange)="mugComponent.updateMaterial('BASE', $event)"/>
               </span>
@@ -101,8 +101,8 @@ interface Rotation {
               Base
               </span>
             </p-chip>
-            <p-chip styleClass="pl-2 pr-3">
-              <span class="w-2rem h-2rem flex align-items-center justify-content-center">
+            <p-chip styleClass="pl-2 pr-4">
+              <span class="w-8 h-8 flex items-center justify-center">
                   <p-colorPicker formControlName="interiorColor"
                                  (onChange)="mugComponent.updateMaterial('INTERIOR', $event)"/>
               </span>
@@ -110,8 +110,8 @@ interface Rotation {
               Interior
               </span>
             </p-chip>
-            <p-chip styleClass="pl-2 pr-3">
-              <span class="w-2rem h-2rem flex align-items-center justify-content-center">
+            <p-chip styleClass="pl-2 pr-4">
+              <span class="w-8 h-8 flex items-center justify-center">
                   <p-colorPicker formControlName="bevelColor"
                                  (onChange)="mugComponent.updateMaterial('BEVEL', $event)"/>
               </span>
@@ -122,7 +122,7 @@ interface Rotation {
           </div>
         </form>
       </div>
-      <div class="max-h-screen flex flex-column flex-auto">
+      <div class="max-h-screen flex flex-col flex-auto">
         <app-mug [isMugMoving]="this.isMugMoving"></app-mug>
       </div>
     </div>
