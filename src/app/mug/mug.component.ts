@@ -13,7 +13,7 @@ import {
 } from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls.js";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader.js";
-import {ThreeUtils} from "../utils/three.utils";
+import {loadModel, loadTexture} from "../utils/three.utils";
 import {ColorPickerChangeEvent} from "primeng/colorpicker";
 import {MugModelPath, MugParts, SceneObjects} from "../app.constants";
 import {MugPartKey} from "../app.types";
@@ -63,7 +63,7 @@ export class MugComponent implements AfterViewInit {
       fov: 30,
       near: 1,
       far: 2000,
-      position: {z: 35}
+      position: {z: 50}
     },
     controls: {
       minDistance: 1,
@@ -137,7 +137,7 @@ export class MugComponent implements AfterViewInit {
   }
 
   private async loadMugModel(): Promise<void> {
-    const mug: GLTF = await ThreeUtils.loadModel(MugModelPath);
+    const mug: GLTF = await loadModel(MugModelPath);
 
     Object.keys(MugParts).forEach((key: string): void => {
       const partKey = key as MugPartKey;
@@ -166,8 +166,7 @@ export class MugComponent implements AfterViewInit {
   private render(): void {
     if (!this.webGLRenderer || !this.canvasElement) return;
 
-    const {clientWidth, clientHeight} = this.canvasElement;
-    this.onWindowResize(clientWidth, clientHeight);
+    this.onWindowResize(window.innerWidth, window.innerHeight);
     this.webGLRenderer.render(this.scene, this.camera);
   }
 
@@ -185,7 +184,7 @@ export class MugComponent implements AfterViewInit {
     const logoMaterial = this.getMaterialByPart('LOGO');
 
     if (logoMaterial) {
-      const textureMap: CanvasTexture = await ThreeUtils.loadTexture(texture);
+      const textureMap: CanvasTexture = await loadTexture(texture);
       textureMap.flipY = false;
       logoMaterial.map = textureMap;
       logoMaterial.needsUpdate = true;

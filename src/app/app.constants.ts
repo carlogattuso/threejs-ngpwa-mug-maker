@@ -15,3 +15,11 @@ export const MugModelPath = 'mug.glb';
 export const DefaultLogoPath = 'glb';
 
 export const DefaultLogoFilename = 'logo.png';
+
+export const MaxFileSizeInMB = 1;
+
+export const AllowedFileExtensions = ['image/png'];
+
+export const InvalidFileSizeMsg = `Invalid file size: ${MaxFileSizeInMB} MB`
+
+export const InvalidFileTypeMsg = `Invalid file type: ${AllowedFileExtensions}`

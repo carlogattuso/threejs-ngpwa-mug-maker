@@ -1,26 +1,18 @@
-import {
-  ApplicationRef,
-  Component,
-  computed,
-  inject,
-  PLATFORM_ID,
-  Renderer2,
-  signal,
-  ViewChild,
-  WritableSignal
-} from '@angular/core';
+import {ApplicationRef, Component, computed, inject, PLATFORM_ID, Renderer2, signal, ViewChild} from '@angular/core';
 import {Button} from "primeng/button";
 import {ColorPickerModule} from "primeng/colorpicker";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {isPlatformBrowser, Location, NgIf} from "@angular/common";
+import {isPlatformBrowser, Location, NgFor} from "@angular/common";
 import {first} from "rxjs";
 import {MugComponent} from "./mug/mug.component";
 import {SelectButtonModule} from "primeng/selectbutton";
 import {DividerModule} from "primeng/divider";
 import {ChipModule} from "primeng/chip";
 import {DefaultLogoFilename, DefaultLogoPath} from "./app.constants";
-import {FileUpload, FileUploadEvent} from "primeng/fileupload";
-import {Toolbar} from "primeng/toolbar";
+import {FileUpload} from "primeng/fileupload";
+import {isFileSizeInvalid, isFileTypeInvalid, readFileAsString} from "./utils/file.utils";
+import {Message} from "primeng/message";
+import {FileValidationError} from "./app.types";
 
 interface Rotation {
   label: string,
@@ -38,104 +30,98 @@ interface Rotation {
     ColorPickerModule,
     FileUpload,
     MugComponent,
-    Toolbar,
-    NgIf,
+    Message,
+    NgFor
   ],
   selector: 'app-root',
   standalone: true,
   styleUrl: './app.component.scss',
   template: `
-    <div class="h-screen flex">
-      <div id="app-sidebar"
-           class="bg-surface-0 dark:bg-surface-950 hidden lg:block shrink-0 absolute lg:static left-0 top-0 z-10 select-none shadow-sm p-4"
-           style="width:280px">
-        <p-divider align="left" type="solid">
-          <span class="font-medium">Design</span>
-        </p-divider>
-        <div class="flex flex-col gap-2">
-          <p-fileupload
-            mode="basic"
-            name="demo[]"
-            chooseIcon="pi pi-upload"
-            url="https://www.primefaces.org/cdn/api/upload.php"
-            accept="image/png" maxFileSize="10000000"
-            invalidFileTypeMessageSummary=""
-            invalidFileTypeMessageDetail="File type not allowed. Allowed extensions: image/png"
-            invalidFileSizeMessageSummary=""
-            invalidFileSizeMessageDetail="File size not allowed. Maximum size: 10 MB"
-            (onUpload)="onBasicUploadAuto($event)"
-            [auto]="true"
-            [chooseLabel]="selectedLogoFile ?  selectedLogoFile.name : 'Upload your design'"
-          />
-          <p-button label="Download template" severity="secondary" icon="pi pi-download"
-                    (click)="downloadTemplate()"/>
-        </div>
+    <div class="bg-surface-0 absolute z-10 shadow rounded-md p-4 m-4 sm:w-full md:w-1/2 lg:w-1/4"
+         style="max-width:600px">
 
-        <p-divider align="left" type="solid">
-          <span class="font-medium">Rotation</span>
-        </p-divider>
+      <p-divider align="left" type="solid">
+        <span class="font-medium">Design</span>
+      </p-divider>
 
-        <p-selectButton
-          [options]="mugRotationState"
-          [(ngModel)]="isMugMoving"
-          optionLabel="label"
-          optionValue="value"
-          [allowEmpty]="false"/>
+      <div class="flex flex-col gap-2">
+        <p-button [label]="logoName ?  logoName : 'Upload your design'" icon="pi pi-upload"
+                  (click)="fileInput.click()" styleClass="w-full"/>
+        <ng-container *ngFor="let text of errorMessages(); let first = first">
+          <p-message
+            severity="error"
+            [text]="text">
+          </p-message>
+        </ng-container>
+        <input type="file" #fileInput accept="image/png" style="display: none"
+               (change)="handleLogoUpload($event)"/>
+        <p-button label="Download template" severity="secondary" icon="pi pi-download"
+                  (click)="downloadTemplate()" styleClass="w-full"/>
+      </div>
 
-        <p-divider align="left" type="solid">
-          <span class="font-medium">Color</span>
-        </p-divider>
+      <p-divider align="left" type="solid">
+        <span class="font-medium">Rotation</span>
+      </p-divider>
 
-        <form [formGroup]="mugColorsFormGroup">
-          <div class="flex flex-wrap gap-2">
-            <p-chip>
+      <p-selectButton
+        [options]="mugRotationStates"
+        [(ngModel)]="isMugMoving"
+        optionLabel="label"
+        optionValue="value"
+        [allowEmpty]="false"/>
+
+      <p-divider align="left" type="solid">
+        <span class="font-medium">Color</span>
+      </p-divider>
+
+      <form [formGroup]="mugColorsFormGroup">
+        <div class="flex flex-wrap gap-2 mb-2">
+          <p-chip>
               <span class="flex items-center justify-center">
                   <p-colorPicker formControlName="handleColor"
                                  (onChange)="mugComponent.updateMaterial('HANDLE', $event)"/>
               </span>
-              <span class="ml-2 font-medium">
+            <span class="ml-2 font-medium">
               Handle
               </span>
-            </p-chip>
-            <p-chip>
+          </p-chip>
+          <p-chip>
               <span class="flex items-center justify-center">
                   <p-colorPicker formControlName="baseColor"
                                  (onChange)="mugComponent.updateMaterial('BASE', $event)"/>
               </span>
-              <span class="ml-2 font-medium">
+            <span class="ml-2 font-medium">
               Base
               </span>
-            </p-chip>
-            <p-chip>
+          </p-chip>
+          <p-chip>
               <span class="flex items-center justify-center">
                   <p-colorPicker formControlName="interiorColor"
                                  (onChange)="mugComponent.updateMaterial('INTERIOR', $event)"/>
               </span>
-              <span class="ml-2 font-medium">
+            <span class="ml-2 font-medium">
               Interior
               </span>
-            </p-chip>
-            <p-chip>
+          </p-chip>
+          <p-chip>
               <span class="flex items-center justify-center">
                   <p-colorPicker formControlName="bevelColor"
                                  (onChange)="mugComponent.updateMaterial('BEVEL', $event)"/>
               </span>
-              <span class="ml-2 font-medium">
+            <span class="ml-2 font-medium">
               Bevel
               </span>
-            </p-chip>
-          </div>
-        </form>
-      </div>
-      <div class="max-h-screen flex flex-col flex-auto">
-        <app-mug [isMugMoving]="this.isMugMoving"></app-mug>
-      </div>
+          </p-chip>
+        </div>
+      </form>
     </div>
+
+    <app-mug [isMugMoving]="isMugMoving()"></app-mug>
   `
 })
 export class AppComponent {
-  static readonly isBrowser: WritableSignal<boolean> = signal(false);
-  static readonly isStable: WritableSignal<boolean> = signal(false);
+  private static readonly isBrowser = signal(false);
+  private static readonly isStable = signal(false);
   static readonly isReady = computed(() => AppComponent.isBrowser() && AppComponent.isStable());
 
   private readonly platformId: object = inject(PLATFORM_ID);
@@ -144,15 +130,16 @@ export class AppComponent {
   title: string = 'mug-maker';
 
   @ViewChild(MugComponent) mugComponent!: MugComponent;
-  mugRotationState: Rotation[] = [{label: 'On', value: true}, {label: 'Off', value: false}];
-  isMugMoving: boolean = true;
+  isMugMoving = signal(true);
+  mugRotationStates: Rotation[] = [{label: 'On', value: true}, {label: 'Off', value: false}];
   mugColorsFormGroup: FormGroup = new FormGroup({
     handleColor: new FormControl('#FFFFFF'),
     baseColor: new FormControl('#FFFFFF'),
     interiorColor: new FormControl('#FFFFFF'),
     bevelColor: new FormControl('#FFFFFF')
   });
-  selectedLogoFile: File | undefined;
+  logoName: string | undefined;
+  errorMessages = signal<string[]>([]);
   private readonly renderer2: Renderer2 = inject(Renderer2);
 
   constructor() {
@@ -162,17 +149,45 @@ export class AppComponent {
     ).subscribe((stable: boolean) => AppComponent.isStable.set(stable));
   }
 
-  onBasicUploadAuto($event: FileUploadEvent): void {
-    this.selectedLogoFile = $event.files[0];
-    const reader: FileReader = new FileReader();
+  handleLogoUpload($event: Event): void {
+    const input = $event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
 
-    reader.addEventListener("load", (): void => {
-      this.mugComponent.setLogo(reader.result as string);
-    }, false);
-
-    if (this.selectedLogoFile) {
-      reader.readAsDataURL(this.selectedLogoFile);
+    if (this.validateFile(file)) {
+      readFileAsString(file, (result: string): void => {
+        this.logoName = file.name;
+        this.mugComponent.setLogo(result);
+      });
     }
+  }
+
+  validateFile(file: File): boolean {
+    this.clearErrorMessages();
+
+    const validations: FileValidationError[] = [
+      isFileSizeInvalid(file),
+      isFileTypeInvalid(file)
+    ];
+
+    const validationErrors = validations
+      .filter(validation => !validation.isValid)
+      .map(validation => validation.message);
+
+    if (validationErrors.length > 0) {
+      this.pushErrorMessages(validationErrors);
+      return false;
+    }
+
+    return true;
+  }
+
+  pushErrorMessages(messages: string[]) {
+    this.errorMessages.set(messages);
+  }
+
+  clearErrorMessages() {
+    this.errorMessages.set([]);
   }
 
   downloadTemplate(): void {
@@ -182,10 +197,4 @@ export class AppComponent {
     anchorElement.click();
   }
 
-  isMenuOpen: boolean = false;
-
-  // Función para alternar el estado del menú en pantallas pequeñas
-  toggleMenu(): void {
-    this.isMenuOpen = !this.isMenuOpen;
-  }
 }
