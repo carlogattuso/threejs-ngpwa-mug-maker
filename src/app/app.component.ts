@@ -10,16 +10,17 @@ import {
   WritableSignal
 } from '@angular/core';
 import {Button} from "primeng/button";
-import {FileUploadEvent, FileUploadModule} from "primeng/fileupload";
 import {ColorPickerModule} from "primeng/colorpicker";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {isPlatformBrowser, Location, NgForOf} from "@angular/common";
+import {isPlatformBrowser, Location, NgIf} from "@angular/common";
 import {first} from "rxjs";
 import {MugComponent} from "./mug/mug.component";
 import {SelectButtonModule} from "primeng/selectbutton";
 import {DividerModule} from "primeng/divider";
 import {ChipModule} from "primeng/chip";
 import {DefaultLogoFilename, DefaultLogoPath} from "./app.constants";
+import {FileUpload, FileUploadEvent} from "primeng/fileupload";
+import {Toolbar} from "primeng/toolbar";
 
 interface Rotation {
   label: string,
@@ -35,9 +36,10 @@ interface Rotation {
     ReactiveFormsModule,
     ChipModule,
     ColorPickerModule,
+    FileUpload,
     MugComponent,
-    FileUploadModule,
-    NgForOf
+    Toolbar,
+    NgIf,
   ],
   selector: 'app-root',
   standalone: true,
@@ -51,40 +53,43 @@ interface Rotation {
           <span class="font-medium">Design</span>
         </p-divider>
         <div class="flex flex-col gap-2">
-          <p-fileUpload
+          <p-fileupload
             mode="basic"
             name="demo[]"
             chooseIcon="pi pi-upload"
-            styleClass="w-full"
             url="https://www.primefaces.org/cdn/api/upload.php"
             accept="image/png" maxFileSize="10000000"
             invalidFileTypeMessageSummary=""
             invalidFileTypeMessageDetail="File type not allowed. Allowed extensions: image/png"
             invalidFileSizeMessageSummary=""
             invalidFileSizeMessageDetail="File size not allowed. Maximum size: 10 MB"
-            (onUpload)="onFileUploadAuto($event)"
+            (onUpload)="onBasicUploadAuto($event)"
             [auto]="true"
             [chooseLabel]="selectedLogoFile ?  selectedLogoFile.name : 'Upload your design'"
           />
-          <p-button label="Download template" severity="secondary" styleClass="w-full" icon="pi pi-download"
+          <p-button label="Download template" severity="secondary" icon="pi pi-download"
                     (click)="downloadTemplate()"/>
         </div>
+
         <p-divider align="left" type="solid">
           <span class="font-medium">Rotation</span>
         </p-divider>
+
         <p-selectButton
           [options]="mugRotationState"
           [(ngModel)]="isMugMoving"
           optionLabel="label"
           optionValue="value"
           [allowEmpty]="false"/>
+
         <p-divider align="left" type="solid">
           <span class="font-medium">Color</span>
         </p-divider>
+
         <form [formGroup]="mugColorsFormGroup">
           <div class="flex flex-wrap gap-2">
-            <p-chip styleClass="pl-2 pr-4">
-              <span class="w-8 h-8 flex items-center justify-center">
+            <p-chip>
+              <span class="flex items-center justify-center">
                   <p-colorPicker formControlName="handleColor"
                                  (onChange)="mugComponent.updateMaterial('HANDLE', $event)"/>
               </span>
@@ -92,8 +97,8 @@ interface Rotation {
               Handle
               </span>
             </p-chip>
-            <p-chip styleClass="pl-2 pr-4">
-              <span class="w-8 h-8 flex items-center justify-center">
+            <p-chip>
+              <span class="flex items-center justify-center">
                   <p-colorPicker formControlName="baseColor"
                                  (onChange)="mugComponent.updateMaterial('BASE', $event)"/>
               </span>
@@ -101,8 +106,8 @@ interface Rotation {
               Base
               </span>
             </p-chip>
-            <p-chip styleClass="pl-2 pr-4">
-              <span class="w-8 h-8 flex items-center justify-center">
+            <p-chip>
+              <span class="flex items-center justify-center">
                   <p-colorPicker formControlName="interiorColor"
                                  (onChange)="mugComponent.updateMaterial('INTERIOR', $event)"/>
               </span>
@@ -110,8 +115,8 @@ interface Rotation {
               Interior
               </span>
             </p-chip>
-            <p-chip styleClass="pl-2 pr-4">
-              <span class="w-8 h-8 flex items-center justify-center">
+            <p-chip>
+              <span class="flex items-center justify-center">
                   <p-colorPicker formControlName="bevelColor"
                                  (onChange)="mugComponent.updateMaterial('BEVEL', $event)"/>
               </span>
@@ -157,7 +162,7 @@ export class AppComponent {
     ).subscribe((stable: boolean) => AppComponent.isStable.set(stable));
   }
 
-  onFileUploadAuto($event: FileUploadEvent): void {
+  onBasicUploadAuto($event: FileUploadEvent): void {
     this.selectedLogoFile = $event.files[0];
     const reader: FileReader = new FileReader();
 
@@ -177,4 +182,10 @@ export class AppComponent {
     anchorElement.click();
   }
 
+  isMenuOpen: boolean = false;
+
+  // Función para alternar el estado del menú en pantallas pequeñas
+  toggleMenu(): void {
+    this.isMenuOpen = !this.isMenuOpen;
+  }
 }
