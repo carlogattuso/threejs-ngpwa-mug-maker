@@ -47,11 +47,12 @@ interface Rotation {
       <div class="flex flex-col gap-2">
         <p-button [label]="logoName ?  logoName : 'Upload your design'" icon="pi pi-upload"
                   (click)="fileInput.click()" styleClass="w-full"/>
-        <ng-container *ngFor="let text of errorMessages(); let first = first">
+        <ng-container *ngFor="let text of errorMessages();">
           <p-message
             severity="error"
-            [text]="text">
-          </p-message>
+            variant="simple"
+            styleClass="flex flex-col items-center"
+            [text]="text"/>
         </ng-container>
         <input type="file" #fileInput accept="image/png" style="display: none"
                (change)="handleLogoUpload($event)"/>
