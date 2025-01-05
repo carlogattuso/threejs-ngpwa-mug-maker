@@ -1,5 +1,5 @@
 import {AfterViewInit, Component, effect, ElementRef, inject, Input, Renderer2, ViewChild} from '@angular/core';
-import {AppComponent} from "../app.component";
+import {AppComponent} from "../../app.component";
 import {
   AmbientLight,
   CanvasTexture,
@@ -13,9 +13,9 @@ import {
 } from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls.js";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader.js";
-import {loadModel, loadTexture} from "../utils/three.utils";
-import {MugModelPath, MugParts, SceneObjects} from "../app.constants";
-import {MugPartKey, SceneConfig} from "../app.types";
+import {loadModel, loadTexture} from "../../utils/three.utils";
+import {MugModelPath, MugParts, SceneObjects} from "../../app.constants";
+import {MugPartKey, SceneConfig} from "../../app.types";
 
 @Component({
   selector: 'app-mug',

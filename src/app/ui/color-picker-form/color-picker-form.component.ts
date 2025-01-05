@@ -3,8 +3,8 @@ import {FormBuilder, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {Chip} from "primeng/chip";
 import {ColorPicker, ColorPickerChangeEvent} from "primeng/colorpicker";
 import {NgFor} from "@angular/common";
-import {MugParts} from "../app.constants";
-import {ColorChangeEvent, ColorPickerControl} from "../app.types";
+import {MugParts} from "../../app.constants";
+import {ColorChangeEvent, ColorPickerControl} from "../../app.types";
 import {Button} from "primeng/button";
 
 @Component({
