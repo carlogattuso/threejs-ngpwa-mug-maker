@@ -5,6 +5,7 @@ import {ColorPicker, ColorPickerChangeEvent} from "primeng/colorpicker";
 import {NgFor} from "@angular/common";
 import {MugParts} from "../app.constants";
 import {ColorChangeEvent, ColorPickerControl} from "../app.types";
+import {Button} from "primeng/button";
 
 @Component({
   selector: 'app-color-picker-form',
@@ -13,11 +14,12 @@ import {ColorChangeEvent, ColorPickerControl} from "../app.types";
     Chip,
     ColorPicker,
     ReactiveFormsModule,
-    NgFor
+    NgFor,
+    Button
   ],
   template: `
     <form [formGroup]="mugColorsFormGroup">
-      <div class="flex flex-wrap gap-2 mb-2">
+      <div class="flex flex-wrap gap-2 mb-4">
         <p-chip *ngFor="let part of mugColorsControls">
             <span class="flex items-center justify-center">
                 <p-colorPicker
@@ -31,6 +33,9 @@ import {ColorChangeEvent, ColorPickerControl} from "../app.types";
         </p-chip>
       </div>
     </form>
+    <p-button label="Reset colors" size="small" icon="pi pi-eraser" styleClass="w-full"
+              (click)="resetColors()"
+              [disabled]="!mugColorsFormGroup.dirty"/>
   `,
   styleUrl: './color-picker-form.component.scss'
 })
@@ -59,4 +64,15 @@ export class ColorPickerFormComponent {
     this.colorChange.emit({key, color: String(event.value)});
   }
 
+  resetColors() {
+    const whiteValues = Object.fromEntries(
+      Object.keys(this.mugColorsFormGroup.controls).map((control: string) => [control, '#FFFFFF'])
+    );
+
+    this.mugColorsFormGroup.reset(whiteValues);
+
+    Object.keys(MugParts).forEach((key: string) => {
+      this.onColorChange(key, {value: '#FFFFFF'} as ColorPickerChangeEvent)
+    });
+  }
 }
