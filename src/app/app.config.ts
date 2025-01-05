@@ -6,16 +6,15 @@ import {provideClientHydration} from '@angular/platform-browser';
 import {provideServiceWorker} from '@angular/service-worker';
 import {provideHttpClient, withFetch} from "@angular/common/http";
 import {providePrimeNG} from "primeng/config";
-
-import Aura from '@primeng/themes/aura';
 import {provideAnimationsAsync} from "@angular/platform-browser/animations/async";
+import {MyPreset} from "../../preset";
 
 export const appConfig: ApplicationConfig = {
   providers: [
     providePrimeNG({
       ripple: true,
       theme: {
-        preset: Aura,
+        preset: MyPreset,
         options: {
           cssLayer: {
             name: 'primeng',

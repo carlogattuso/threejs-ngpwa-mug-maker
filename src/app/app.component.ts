@@ -33,7 +33,7 @@ import {ColorPickerFormComponent} from "./color-picker-form/color-picker-form.co
     <div class="h-screen flex">
 
       <div
-        class="bg-surface-0 shrink-0 hidden lg:block absolute lg:static select-none z-10 shadow p-4"
+        class="shrink-0 hidden lg:block absolute lg:static select-none z-10 shadow p-4"
         style="max-width: 280px">
 
         <p-divider align="left" type="solid">
