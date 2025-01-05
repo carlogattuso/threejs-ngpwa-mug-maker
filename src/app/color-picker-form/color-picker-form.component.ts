@@ -47,7 +47,7 @@ export class ColorPickerFormComponent {
       label: key.charAt(0).toUpperCase() + key.slice(1).toLowerCase(),
       key: key as string,
     }));
-    console.log(this.mugColorsControls);
+
     this.mugColorsFormGroup = this.fb.group(
       Object.fromEntries(
         this.mugColorsControls.map((part: ColorPickerControl) => [part.controlName, '#FFFFFF'])

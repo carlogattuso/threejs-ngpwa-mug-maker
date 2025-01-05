@@ -22,10 +22,11 @@ import {MugPartKey, SceneConfig} from "../app.types";
   standalone: true,
   imports: [],
   template: `
-    <canvas #canvas class="h-screen w-full"></canvas>`
+    <canvas #canvas class="!h-screen !w-full"></canvas>
+  `
 })
 export class MugComponent implements AfterViewInit {
-  @ViewChild('canvas', {static: true})
+  @ViewChild('canvas')
   private readonly canvas!: ElementRef<HTMLCanvasElement>;
   private canvasElement!: HTMLCanvasElement;
 
@@ -46,7 +47,7 @@ export class MugComponent implements AfterViewInit {
       fov: 30,
       near: 1,
       far: 2000,
-      position: {z: 50}
+      position: {z: 35}
     },
     controls: {
       minDistance: 1,
@@ -74,7 +75,7 @@ export class MugComponent implements AfterViewInit {
 
   private initCamera(): PerspectiveCamera {
     const {fov, near, far, position} = this.sceneConfig.camera;
-    const camera = new PerspectiveCamera(fov, window.innerWidth / window.innerHeight, near, far);
+    const camera = new PerspectiveCamera(fov, this.canvasElement.clientWidth / this.canvasElement.clientHeight, near, far);
     camera.position.z = position.z;
     return camera;
   }
@@ -149,7 +150,7 @@ export class MugComponent implements AfterViewInit {
   private render(): void {
     if (!this.webGLRenderer || !this.canvasElement) return;
 
-    this.onWindowResize(window.innerWidth, window.innerHeight);
+    this.onWindowResize(this.canvasElement.clientWidth, this.canvasElement.clientHeight);
     this.webGLRenderer.render(this.scene, this.camera);
   }
 
@@ -183,4 +184,5 @@ export class MugComponent implements AfterViewInit {
       material.needsUpdate = true;
     }
   }
+
 }

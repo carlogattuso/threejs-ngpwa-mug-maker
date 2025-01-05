@@ -17,7 +17,6 @@ export const isFileTypeInvalid = (file: File): FileValidationError => {
 
 export const readFileAsString = (file: File, callback: (result: string) => void): void => {
   const reader = new FileReader();
-  console.log('hola');
   reader.addEventListener("load", () => {
     callback(reader.result as string);
   });

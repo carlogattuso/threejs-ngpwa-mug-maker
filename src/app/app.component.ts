@@ -30,48 +30,54 @@ import {ColorPickerFormComponent} from "./color-picker-form/color-picker-form.co
   standalone: true,
   styleUrl: './app.component.scss',
   template: `
-    <div class="bg-surface-0 absolute z-10 shadow rounded-md p-4 m-4 sm:w-full md:w-1/2 lg:w-1/4"
-         style="max-width:600px">
+    <div class="h-screen flex">
 
-      <p-divider align="left" type="solid">
-        <span class="font-medium">Design</span>
-      </p-divider>
+      <div
+        class="bg-surface-0 shrink-0 hidden lg:block absolute lg:static select-none z-10 shadow p-4"
+        style="max-width: 280px">
 
-      <div class="flex flex-col gap-2">
-        <p-button [label]="logoName ?  logoName : 'Upload your design'" icon="pi pi-upload"
-                  (click)="fileInput.click()" styleClass="w-full"/>
-        <ng-container *ngFor="let text of errorMessages();">
-          <p-message
-            severity="error"
-            variant="simple"
-            styleClass="flex flex-col items-center"
-            [text]="text"/>
-        </ng-container>
-        <input type="file" #fileInput accept="image/png" style="display: none"
-               (change)="handleLogoUpload($event)"/>
-        <p-button label="Download template" severity="secondary" icon="pi pi-download"
-                  (click)="downloadTemplate()" styleClass="w-full"/>
+        <p-divider align="left" type="solid">
+          <span class="font-medium">Design</span>
+        </p-divider>
+
+        <div class="flex flex-col gap-2">
+          <p-button [label]="logoName ?  logoName : 'Upload your design'" icon="pi pi-upload"
+                    (click)="fileInput.click()" styleClass="w-full"/>
+          <ng-container *ngFor="let text of errorMessages();">
+            <p-message
+              severity="error"
+              variant="simple"
+              styleClass="flex flex-col items-center"
+              [text]="text"/>
+          </ng-container>
+          <input type="file" #fileInput accept="image/png" style="display: none"
+                 (change)="handleLogoUpload($event)"/>
+          <p-button label="Download template" severity="secondary" icon="pi pi-download"
+                    (click)="downloadTemplate()" styleClass="w-full"/>
+        </div>
+
+        <p-divider align="left" type="solid">
+          <span class="font-medium">Rotation</span>
+        </p-divider>
+
+        <p-selectButton
+          [options]="mugRotationStates"
+          [(ngModel)]="isMugMoving"
+          optionLabel="label"
+          optionValue="value"
+          [allowEmpty]="false"/>
+
+        <p-divider align="left" type="solid">
+          <span class="font-medium">Color</span>
+        </p-divider>
+
+        <app-color-picker-form (colorChange)="onColorChange($event)"/>
+
       </div>
 
-      <p-divider align="left" type="solid">
-        <span class="font-medium">Rotation</span>
-      </p-divider>
+      <app-mug class="grow" [isMugMoving]="isMugMoving()"></app-mug>
 
-      <p-selectButton
-        [options]="mugRotationStates"
-        [(ngModel)]="isMugMoving"
-        optionLabel="label"
-        optionValue="value"
-        [allowEmpty]="false"/>
-
-      <p-divider align="left" type="solid">
-        <span class="font-medium">Color</span>
-      </p-divider>
-
-      <app-color-picker-form (colorChange)="onColorChange($event)"/>
     </div>
-
-    <app-mug [isMugMoving]="isMugMoving()"></app-mug>
   `
 })
 export class AppComponent {
