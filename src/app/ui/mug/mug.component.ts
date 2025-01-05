@@ -1,5 +1,4 @@
-import {AfterViewInit, Component, effect, ElementRef, inject, Input, Renderer2, ViewChild} from '@angular/core';
-import {AppComponent} from "../../app.component";
+import {AfterViewInit, Component, ElementRef, inject, Input, PLATFORM_ID, Renderer2, ViewChild} from '@angular/core';
 import {
   AmbientLight,
   CanvasTexture,
@@ -16,6 +15,7 @@ import {GLTF} from "three/examples/jsm/loaders/GLTFLoader.js";
 import {loadModel, loadTexture} from "../../utils/three.utils";
 import {MugModelPath, MugParts, SceneObjects} from "../../app.constants";
 import {MugPartKey, SceneConfig} from "../../app.types";
+import {isPlatformBrowser} from "@angular/common";
 
 @Component({
   selector: 'app-mug',
@@ -26,12 +26,13 @@ import {MugPartKey, SceneConfig} from "../../app.types";
   `
 })
 export class MugComponent implements AfterViewInit {
-  @ViewChild('canvas')
+  @ViewChild('canvas', {static: true})
   private readonly canvas!: ElementRef<HTMLCanvasElement>;
   private canvasElement!: HTMLCanvasElement;
 
   @Input() isMugMoving = true;
 
+  private readonly platformId: object = inject(PLATFORM_ID);
   private readonly renderer2: Renderer2 = inject(Renderer2);
   private readonly scene = new Scene();
   private camera!: PerspectiveCamera;
@@ -60,17 +61,13 @@ export class MugComponent implements AfterViewInit {
     directional: new DirectionalLight(0xffffff, this.sceneConfig.directionalLightIntensity)
   };
 
-  constructor() {
-    effect((): void => {
-      if (AppComponent.isReady()) {
-        this.camera = this.initCamera();
-        this.initScene();
-      }
-    });
-  }
-
   ngAfterViewInit(): void {
     this.canvasElement = this.renderer2.selectRootElement(this.canvas.nativeElement, true) as HTMLCanvasElement;
+    this.camera = this.initCamera();
+
+    if (isPlatformBrowser(this.platformId)) {
+      this.initScene();
+    }
   }
 
   private initCamera(): PerspectiveCamera {

@@ -1,17 +1,15 @@
 import {ApplicationRef, Component, computed, inject, PLATFORM_ID, Renderer2, signal, ViewChild} from '@angular/core';
 import {Button} from "primeng/button";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {isPlatformBrowser, Location, NgFor, NgStyle} from "@angular/common";
-import {first} from "rxjs";
-import {MugComponent} from "./mug/mug.component";
+import {isPlatformBrowser, Location, NgFor} from "@angular/common";
+import {MugComponent} from "./ui/mug/mug.component";
 import {SelectButtonModule} from "primeng/selectbutton";
 import {DividerModule} from "primeng/divider";
 import {DefaultLogoFilename, DefaultLogoPath} from "./app.constants";
-import {FileUpload} from "primeng/fileupload";
 import {isFileSizeInvalid, isFileTypeInvalid, readFileAsString} from "./utils/file.utils";
 import {Message} from "primeng/message";
 import {ColorChangeEvent, FileValidationError, MugPartKey, RotationState} from "./app.types";
-import {ColorPickerFormComponent} from "./color-picker-form/color-picker-form.component";
+import {ColorPickerFormComponent} from "./ui/color-picker-form/color-picker-form.component";
 
 @Component({
   imports: [
@@ -20,12 +18,10 @@ import {ColorPickerFormComponent} from "./color-picker-form/color-picker-form.co
     SelectButtonModule,
     FormsModule,
     ReactiveFormsModule,
-    FileUpload,
     MugComponent,
     Message,
     NgFor,
     ColorPickerFormComponent,
-    NgStyle
   ],
   selector: 'app-root',
   standalone: true,
@@ -81,28 +77,28 @@ import {ColorPickerFormComponent} from "./color-picker-form/color-picker-form.co
     </div>
   `
 })
-export class AppComponent {
-  private static readonly isBrowser = signal(false);
-  private static readonly isStable = signal(false);
-  static readonly isReady = computed(() => AppComponent.isBrowser() && AppComponent.isStable());
-
+export class AppComponent implements AfterViewInit {
   private readonly platformId: object = inject(PLATFORM_ID);
-  private readonly applicationRef: ApplicationRef = inject(ApplicationRef);
+  private readonly renderer2: Renderer2 = inject(Renderer2);
 
   title: string = 'mug-maker';
+  sidebarPosition: number = 250;
 
   @ViewChild(MugComponent) mugComponent!: MugComponent;
   isMugMoving = signal(true);
   mugRotationStates: RotationState[] = [{label: 'On', value: true}, {label: 'Off', value: false}];
   logoName: string | undefined;
   errorMessages = signal<string[]>([]);
-  private readonly renderer2: Renderer2 = inject(Renderer2);
 
-  constructor() {
-    AppComponent.isBrowser.set(isPlatformBrowser(this.platformId));
-    this.applicationRef.isStable.pipe(
-      first((stable: boolean) => stable)
-    ).subscribe((stable: boolean) => AppComponent.isStable.set(stable));
+  ngAfterViewInit(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      this.sidebarPosition = window.innerWidth >= 1024 ? 0 : 250;
+    }
+  }
+
+  @HostListener('window:resize')
+  onResize() {
+    this.sidebarPosition = window.innerWidth >= 1024 ? 0 : 250;
   }
 
   handleLogoUpload($event: Event): void {
@@ -156,4 +152,5 @@ export class AppComponent {
   onColorChange(colorChangeEvent: ColorChangeEvent): void {
     this.mugComponent.updateMaterial(colorChangeEvent.key as MugPartKey, colorChangeEvent.color);
   }
+
 }
