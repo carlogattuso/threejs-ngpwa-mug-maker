@@ -1,23 +1,17 @@
 import {ApplicationRef, Component, computed, inject, PLATFORM_ID, Renderer2, signal, ViewChild} from '@angular/core';
 import {Button} from "primeng/button";
-import {ColorPickerModule} from "primeng/colorpicker";
-import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {isPlatformBrowser, Location, NgFor} from "@angular/common";
 import {first} from "rxjs";
 import {MugComponent} from "./mug/mug.component";
 import {SelectButtonModule} from "primeng/selectbutton";
 import {DividerModule} from "primeng/divider";
-import {ChipModule} from "primeng/chip";
 import {DefaultLogoFilename, DefaultLogoPath} from "./app.constants";
 import {FileUpload} from "primeng/fileupload";
 import {isFileSizeInvalid, isFileTypeInvalid, readFileAsString} from "./utils/file.utils";
 import {Message} from "primeng/message";
-import {FileValidationError} from "./app.types";
-
-interface Rotation {
-  label: string,
-  value: boolean
-}
+import {ColorChangeEvent, FileValidationError, MugPartKey, RotationState} from "./app.types";
+import {ColorPickerFormComponent} from "./color-picker-form/color-picker-form.component";
 
 @Component({
   imports: [
@@ -26,12 +20,11 @@ interface Rotation {
     SelectButtonModule,
     FormsModule,
     ReactiveFormsModule,
-    ChipModule,
-    ColorPickerModule,
     FileUpload,
     MugComponent,
     Message,
-    NgFor
+    NgFor,
+    ColorPickerFormComponent
   ],
   selector: 'app-root',
   standalone: true,
@@ -75,46 +68,7 @@ interface Rotation {
         <span class="font-medium">Color</span>
       </p-divider>
 
-      <form [formGroup]="mugColorsFormGroup">
-        <div class="flex flex-wrap gap-2 mb-2">
-          <p-chip>
-              <span class="flex items-center justify-center">
-                  <p-colorPicker formControlName="handleColor"
-                                 (onChange)="mugComponent.updateMaterial('HANDLE', $event)"/>
-              </span>
-            <span class="ml-2 font-medium">
-              Handle
-              </span>
-          </p-chip>
-          <p-chip>
-              <span class="flex items-center justify-center">
-                  <p-colorPicker formControlName="baseColor"
-                                 (onChange)="mugComponent.updateMaterial('BASE', $event)"/>
-              </span>
-            <span class="ml-2 font-medium">
-              Base
-              </span>
-          </p-chip>
-          <p-chip>
-              <span class="flex items-center justify-center">
-                  <p-colorPicker formControlName="interiorColor"
-                                 (onChange)="mugComponent.updateMaterial('INTERIOR', $event)"/>
-              </span>
-            <span class="ml-2 font-medium">
-              Interior
-              </span>
-          </p-chip>
-          <p-chip>
-              <span class="flex items-center justify-center">
-                  <p-colorPicker formControlName="bevelColor"
-                                 (onChange)="mugComponent.updateMaterial('BEVEL', $event)"/>
-              </span>
-            <span class="ml-2 font-medium">
-              Bevel
-              </span>
-          </p-chip>
-        </div>
-      </form>
+      <app-color-picker-form (colorChange)="onColorChange($event)"/>
     </div>
 
     <app-mug [isMugMoving]="isMugMoving()"></app-mug>
@@ -132,13 +86,7 @@ export class AppComponent {
 
   @ViewChild(MugComponent) mugComponent!: MugComponent;
   isMugMoving = signal(true);
-  mugRotationStates: Rotation[] = [{label: 'On', value: true}, {label: 'Off', value: false}];
-  mugColorsFormGroup: FormGroup = new FormGroup({
-    handleColor: new FormControl('#FFFFFF'),
-    baseColor: new FormControl('#FFFFFF'),
-    interiorColor: new FormControl('#FFFFFF'),
-    bevelColor: new FormControl('#FFFFFF')
-  });
+  mugRotationStates: RotationState[] = [{label: 'On', value: true}, {label: 'Off', value: false}];
   logoName: string | undefined;
   errorMessages = signal<string[]>([]);
   private readonly renderer2: Renderer2 = inject(Renderer2);
@@ -198,4 +146,7 @@ export class AppComponent {
     anchorElement.click();
   }
 
+  onColorChange(colorChangeEvent: ColorChangeEvent): void {
+    this.mugComponent.updateMaterial(colorChangeEvent.key as MugPartKey, colorChangeEvent.color);
+  }
 }

@@ -14,25 +14,8 @@ import {
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls.js";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader.js";
 import {loadModel, loadTexture} from "../utils/three.utils";
-import {ColorPickerChangeEvent} from "primeng/colorpicker";
 import {MugModelPath, MugParts, SceneObjects} from "../app.constants";
-import {MugPartKey} from "../app.types";
-
-interface SceneConfig {
-  ambientLightIntensity: number;
-  directionalLightIntensity: number;
-  directionalLightPosition: [number, number, number];
-  camera: {
-    fov: number;
-    near: number;
-    far: number;
-    position: { z: number };
-  };
-  controls: {
-    minDistance: number;
-    maxDistance: number;
-  };
-}
+import {MugPartKey, SceneConfig} from "../app.types";
 
 @Component({
   selector: 'app-mug',
@@ -191,11 +174,11 @@ export class MugComponent implements AfterViewInit {
     }
   }
 
-  public updateMaterial(part: MugPartKey, event: ColorPickerChangeEvent): void {
+  public updateMaterial(part: MugPartKey, color: string): void {
     const material = this.getMaterialByPart(part);
 
     if (material) {
-      const colorRGB = parseInt(String(event.value).replace("#", "0x"), 16);
+      const colorRGB = parseInt(color.replace("#", "0x"), 16);
       material.color.setHex(colorRGB, SRGBColorSpace);
       material.needsUpdate = true;
     }
