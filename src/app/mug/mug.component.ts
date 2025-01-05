@@ -47,7 +47,7 @@ export class MugComponent implements AfterViewInit {
       fov: 30,
       near: 1,
       far: 2000,
-      position: {z: 35}
+      position: {z: 50}
     },
     controls: {
       minDistance: 1,

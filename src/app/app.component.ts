@@ -1,7 +1,7 @@
 import {ApplicationRef, Component, computed, inject, PLATFORM_ID, Renderer2, signal, ViewChild} from '@angular/core';
 import {Button} from "primeng/button";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {isPlatformBrowser, Location, NgFor} from "@angular/common";
+import {isPlatformBrowser, Location, NgFor, NgStyle} from "@angular/common";
 import {first} from "rxjs";
 import {MugComponent} from "./mug/mug.component";
 import {SelectButtonModule} from "primeng/selectbutton";
@@ -24,7 +24,8 @@ import {ColorPickerFormComponent} from "./color-picker-form/color-picker-form.co
     MugComponent,
     Message,
     NgFor,
-    ColorPickerFormComponent
+    ColorPickerFormComponent,
+    NgStyle
   ],
   selector: 'app-root',
   standalone: true,
@@ -75,7 +76,7 @@ import {ColorPickerFormComponent} from "./color-picker-form/color-picker-form.co
 
       </div>
 
-      <app-mug class="grow" [isMugMoving]="isMugMoving()"></app-mug>
+      <app-mug [ngStyle]="{ 'background-color': '#F9FAFB'}" class="grow" [isMugMoving]="isMugMoving()"></app-mug>
 
     </div>
   `

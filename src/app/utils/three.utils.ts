@@ -1,5 +1,6 @@
-import {CanvasTexture, ImageLoader, SRGBColorSpace} from "three";
+import {CanvasTexture, ImageLoader, Mesh, MeshPhysicalMaterial, SRGBColorSpace} from "three";
 import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader.js";
+import {MugParts} from "../app.constants";
 
 export const loadTexture = (texture: string): Promise<CanvasTexture> => {
   return new Promise((resolve, reject): void => {
@@ -24,6 +25,10 @@ export const loadModel = (path: string): Promise<GLTF> => {
     new GLTFLoader()
       .load(path,
         async (model: GLTF): Promise<void> => {
+          const texture: CanvasTexture = await loadTexture('glb/default.png');
+          const material = (model.scene.getObjectByName(MugParts['LOGO']) as Mesh).material as MeshPhysicalMaterial;
+          material.map!.image = texture.image;
+          material.needsUpdate = true;
           resolve(model);
         },
         (): void => {
