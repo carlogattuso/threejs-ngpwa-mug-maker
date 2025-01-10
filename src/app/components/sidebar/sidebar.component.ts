@@ -18,7 +18,7 @@ import {Message} from "primeng/message";
 import {isPlatformBrowser, Location, NgForOf, NgIf} from "@angular/common";
 import {SelectButton} from "primeng/selectbutton";
 import {DefaultLogoFilename, DefaultLogoPath, SmallScreenBreakpointInPixels} from "../../app.constants";
-import {ColorChangeEvent, RotationState} from "../../app.types";
+import {ColorChangeEvent, RotationState, SidebarState} from "../../app.types";
 import {FormsModule} from "@angular/forms";
 
 @Component({
@@ -59,7 +59,7 @@ import {FormsModule} from "@angular/forms";
         size="large"
         severity="secondary"
         [raised]="true"
-        [icon]="'pi '.concat(this.sidebarState === 'opened' ? 'pi-times' : 'pi-sliders-h')"
+        [icon]="'pi '.concat(getSidebarButtonIcon())"
         (click)="toggleSidebar()">
       </p-button>
 
@@ -107,8 +107,8 @@ export class SidebarComponent implements OnInit {
   private readonly platformId: object = inject(PLATFORM_ID);
   private readonly renderer2: Renderer2 = inject(Renderer2);
 
-  protected sidebarState: 'opened' | 'closed' = 'opened';
-  protected isToggleSidebarButtonVisible = true;
+  protected sidebarState: SidebarState = SidebarState.Closed;
+  protected isToggleSidebarButtonVisible = false;
   protected mugRotationStates: RotationState[] = [{label: 'On', value: true}, {label: 'Off', value: false}];
   protected errorMessages = signal<string[]>([]);
   protected _uploadedLogoName: string | undefined;
@@ -129,14 +129,12 @@ export class SidebarComponent implements OnInit {
   }
 
   private updateSidebarState() {
-    setTimeout(() => {
-      this.isToggleSidebarButtonVisible = this.isSmallScreen();
-      this.sidebarState = this.isSmallScreen() ? 'closed' : 'opened';
-    }, 300);
+    this.isToggleSidebarButtonVisible = this.isSmallScreen();
+    this.sidebarState = this.isSmallScreen() ? SidebarState.Closed : SidebarState.Opened;
   }
 
   toggleSidebar(): void {
-    this.sidebarState = this.sidebarState === 'opened' ? 'closed' : 'opened';
+    this.sidebarState = this.sidebarState === SidebarState.Opened ? SidebarState.Closed : SidebarState.Opened;
   }
 
   isSmallScreen(): boolean {
@@ -169,5 +167,9 @@ export class SidebarComponent implements OnInit {
 
   onColorChange(color: ColorChangeEvent) {
     this.colorChanged.emit(color);
+  }
+
+  getSidebarButtonIcon(): string {
+    return this.sidebarState === SidebarState.Opened ? 'pi-times' : 'pi-sliders-h';
   }
 }

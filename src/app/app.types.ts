@@ -38,3 +38,8 @@ export type ColorChangeEvent = {
   key: string,
   color: string
 }
+
+export enum SidebarState {
+  Opened = 'opened',
+  Closed = 'closed'
+}
