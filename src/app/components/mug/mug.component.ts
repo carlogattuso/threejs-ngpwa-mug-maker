@@ -26,20 +26,12 @@ import {isPlatformBrowser} from "@angular/common";
   `
 })
 export class MugComponent implements AfterViewInit {
+  private readonly platformId: object = inject(PLATFORM_ID);
+  private readonly renderer2: Renderer2 = inject(Renderer2);
+
   @ViewChild('canvas', {static: true})
   private readonly canvas!: ElementRef<HTMLCanvasElement>;
   private canvasElement!: HTMLCanvasElement;
-
-  @Input() isMugMoving = true;
-
-  private readonly platformId: object = inject(PLATFORM_ID);
-  private readonly renderer2: Renderer2 = inject(Renderer2);
-  private readonly scene = new Scene();
-  private camera!: PerspectiveCamera;
-  private webGLRenderer?: WebGLRenderer;
-  private controls?: OrbitControls;
-  private mugMaterialsMap: Map<keyof typeof MugParts, MeshPhysicalMaterial> = new Map();
-
   private readonly sceneConfig: SceneConfig = {
     ambientLightIntensity: 0.75,
     directionalLightIntensity: 2.75,
@@ -48,18 +40,24 @@ export class MugComponent implements AfterViewInit {
       fov: 30,
       near: 1,
       far: 2000,
-      position: {z: 50}
+      position: {z: 35}
     },
     controls: {
       minDistance: 1,
       maxDistance: 1000
     }
   };
-
+  private readonly scene = new Scene();
+  private camera!: PerspectiveCamera;
+  private webGLRenderer?: WebGLRenderer;
+  private controls?: OrbitControls;
+  private mugMaterialsMap: Map<keyof typeof MugParts, MeshPhysicalMaterial> = new Map();
   private readonly lights = {
     ambient: new AmbientLight(0xffffff, this.sceneConfig.ambientLightIntensity),
     directional: new DirectionalLight(0xffffff, this.sceneConfig.directionalLightIntensity)
   };
+  
+  @Input() isMugMoving = true;
 
   ngAfterViewInit(): void {
     this.canvasElement = this.renderer2.selectRootElement(this.canvas.nativeElement, true) as HTMLCanvasElement;
@@ -103,7 +101,7 @@ export class MugComponent implements AfterViewInit {
     });
 
     this.webGLRenderer.setPixelRatio(window.devicePixelRatio);
-    this.webGLRenderer.setClearColor(0xF9FAFB);
+    this.webGLRenderer.setClearColor(0xFFFFFF);
     this.webGLRenderer.setSize(window.innerWidth, window.innerHeight);
     this.webGLRenderer.localClippingEnabled = true;
   }

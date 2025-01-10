@@ -23,3 +23,7 @@ export const AllowedFileExtensions = ['image/png'];
 export const InvalidFileSizeMsg = `Invalid file size: ${MaxFileSizeInMB} MB`
 
 export const InvalidFileTypeMsg = `Invalid file type: ${AllowedFileExtensions}`
+
+export const SidebarWidthInPixels = 280;
+
+export const SmallScreenBreakpointInPixels = 1024
