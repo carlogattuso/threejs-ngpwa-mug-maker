@@ -2,12 +2,11 @@ import {ApplicationConfig, isDevMode, provideZoneChangeDetection} from '@angular
 import {provideRouter} from '@angular/router';
 
 import {routes} from './app.routes';
-import {provideClientHydration} from '@angular/platform-browser';
 import {provideServiceWorker} from '@angular/service-worker';
 import {provideHttpClient, withFetch} from "@angular/common/http";
 import {providePrimeNG} from "primeng/config";
-import {provideAnimationsAsync} from "@angular/platform-browser/animations/async";
 import {MyPreset} from "../../preset";
+import {provideAnimations} from "@angular/platform-browser/animations";
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -25,8 +24,7 @@ export const appConfig: ApplicationConfig = {
     }),
     provideZoneChangeDetection({eventCoalescing: true}),
     provideRouter(routes),
-    provideClientHydration(),
-    provideAnimationsAsync(),
+    provideAnimations(),
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000'
