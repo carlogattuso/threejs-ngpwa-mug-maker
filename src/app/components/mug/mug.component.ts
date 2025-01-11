@@ -22,7 +22,7 @@ import {isPlatformBrowser} from "@angular/common";
   standalone: true,
   imports: [],
   template: `
-    <canvas #canvas class="!h-screen !w-full"></canvas>
+    <canvas #canvas class="!h-screen !w-screen"></canvas>
   `
 })
 export class MugComponent implements AfterViewInit {
@@ -56,7 +56,7 @@ export class MugComponent implements AfterViewInit {
     ambient: new AmbientLight(0xffffff, this.sceneConfig.ambientLightIntensity),
     directional: new DirectionalLight(0xffffff, this.sceneConfig.directionalLightIntensity)
   };
-  
+
   @Input() isMugMoving = true;
 
   ngAfterViewInit(): void {

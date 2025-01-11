@@ -3,20 +3,21 @@ import {MugComponent} from "./components/mug/mug.component";
 import {SidebarComponent} from "./components/sidebar/sidebar.component";
 import {ColorChangeEvent, FileValidationError, MugPartKey} from "./app.types";
 import {isFileSizeInvalid, isFileTypeInvalid, readFileAsString} from "./utils/file.utils";
+import {ToolbarComponent} from "./components/toolbar/toolbar.component";
 
 @Component({
   imports: [
     SidebarComponent,
-    MugComponent
+    MugComponent,
+    ToolbarComponent
   ],
   selector: 'app-root',
   standalone: true,
   styleUrl: './app.component.scss',
   template: `
-    <div class="h-screen flex">
-      <app-sidebar class="shrink-0" [isMugMoving]="isMugMoving()" (logoUploaded)="handleLogoUpload($event)"
-                   (colorChanged)="onColorChange($event)"/>
-      <app-mug class="grow" [isMugMoving]="isMugMoving()"/>
+    <div class="relative">
+      <app-toolbar/>
+      <app-mug [isMugMoving]="isMugMoving()"/>
     </div>
   `
 })
