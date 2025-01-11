@@ -1,31 +1,13 @@
 import {Component, signal, ViewChild} from '@angular/core';
-import {Button} from "primeng/button";
-import {FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {NgFor, NgIf} from "@angular/common";
 import {MugComponent} from "./components/mug/mug.component";
-import {SelectButtonModule} from "primeng/selectbutton";
-import {DividerModule} from "primeng/divider";
-import {Message} from "primeng/message";
-import {ColorPickerFormComponent} from "./components/color-picker-form/color-picker-form.component";
-import {Menubar} from "primeng/menubar";
 import {SidebarComponent} from "./components/sidebar/sidebar.component";
 import {ColorChangeEvent, FileValidationError, MugPartKey} from "./app.types";
 import {isFileSizeInvalid, isFileTypeInvalid, readFileAsString} from "./utils/file.utils";
 
 @Component({
   imports: [
-    DividerModule,
-    Button,
-    SelectButtonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MugComponent,
-    Message,
-    NgFor,
-    ColorPickerFormComponent,
-    Menubar,
-    NgIf,
     SidebarComponent,
+    MugComponent
   ],
   selector: 'app-root',
   standalone: true,
