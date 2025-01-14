@@ -1,22 +1,55 @@
 import {MugParts} from "./app.constants";
 
 export type SceneConfig = {
-  ambientLightIntensity: number;
-  directionalLightIntensity: number;
-  directionalLightPosition: [number, number, number];
+  lights: {
+    color: number
+    ambient: {
+      intensity: number
+    },
+    directional: {
+      intensity: number,
+      h: number,
+      s: number,
+      l: number,
+      position: {
+        x: number,
+        y: number,
+        z: number,
+      };
+      scale: number
+    }
+  },
   camera: {
-    fov: number;
-    near: number;
-    far: number;
-    position: { z: number };
-  };
+    fov: number,
+    near: number,
+    far: number,
+    position: {
+      z: number
+    }
+  },
+  renderer: {
+    backgroundColor: number,
+    localClippingEnabled: boolean,
+    antialias: boolean
+  }
   controls: {
-    minDistance: number;
-    maxDistance: number;
-  };
+    minDistance: number,
+    maxDistance: number,
+    enablePan: boolean
+  }
+}
+
+export type CanvasDimensions = {
+  width: number,
+  height: number
 }
 
 export type MugPartKey = keyof typeof MugParts;
+
+export enum RotationStateLabel {
+  On = 'On',
+  Off = 'Off'
+}
 
 export type RotationState = {
   label: string,
@@ -40,6 +73,6 @@ export type ColorChangeEvent = {
 }
 
 export enum SidebarState {
-  Opened = 'opened',
+  Open = 'open',
   Closed = 'closed'
 }

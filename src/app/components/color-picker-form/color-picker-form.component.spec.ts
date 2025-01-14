@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { ColorPickerFormComponent } from './color-picker-form.component';
+import {ColorPickerFormComponent} from './color-picker-form.component';
 
 describe('ColorPickerFormComponent', () => {
   let component: ColorPickerFormComponent;
@@ -10,7 +10,7 @@ describe('ColorPickerFormComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ColorPickerFormComponent]
     })
-    .compileComponents();
+      .compileComponents();
 
     fixture = TestBed.createComponent(ColorPickerFormComponent);
     component = fixture.componentInstance;

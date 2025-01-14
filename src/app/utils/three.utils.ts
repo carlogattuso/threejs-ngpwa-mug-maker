@@ -29,6 +29,7 @@ export const loadModel = (path: string): Promise<GLTF> => {
           const material = (model.scene.getObjectByName(MugParts['LOGO']) as Mesh).material as MeshPhysicalMaterial;
           material.map!.image = texture.image;
           material.needsUpdate = true;
+          
           resolve(model);
         },
         (): void => {

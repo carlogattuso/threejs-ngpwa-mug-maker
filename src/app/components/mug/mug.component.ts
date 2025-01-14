@@ -1,134 +1,105 @@
-import {AfterViewInit, Component, ElementRef, inject, Input, PLATFORM_ID, Renderer2, ViewChild} from '@angular/core';
-import {
-  AmbientLight,
-  CanvasTexture,
-  DirectionalLight,
-  Mesh,
-  MeshPhysicalMaterial,
-  PerspectiveCamera,
-  Scene,
-  SRGBColorSpace,
-  WebGLRenderer
-} from "three";
+import {Component, ElementRef, HostListener, inject, Input, OnInit, ViewChild} from '@angular/core';
+import {AmbientLight, DirectionalLight, PerspectiveCamera, Scene, WebGLRenderer} from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls.js";
-import {GLTF} from "three/examples/jsm/loaders/GLTFLoader.js";
-import {loadModel, loadTexture} from "../../utils/three.utils";
-import {MugModelPath, MugParts, SceneObjects} from "../../app.constants";
-import {MugPartKey, SceneConfig} from "../../app.types";
-import {isPlatformBrowser} from "@angular/common";
+import {loadModel} from "../../utils/three.utils";
+import {MugModelPath, SceneObjects} from "../../app.constants";
+import {SceneConfigService} from "../../services/scene-config.service";
+import {CanvasDimensions} from "../../app.types";
 
 @Component({
   selector: 'app-mug',
   standalone: true,
   imports: [],
   template: `
-    <canvas #canvas class="!h-screen !w-screen"></canvas>
+    <canvas #canvas class="!h-screen !w-full"></canvas>
   `
 })
-export class MugComponent implements AfterViewInit {
-  private readonly platformId: object = inject(PLATFORM_ID);
-  private readonly renderer2: Renderer2 = inject(Renderer2);
+export class MugComponent implements OnInit {
+  @Input() isMugMoving = true;
 
   @ViewChild('canvas', {static: true})
   private readonly canvas!: ElementRef<HTMLCanvasElement>;
-  private canvasElement!: HTMLCanvasElement;
-  private readonly sceneConfig: SceneConfig = {
-    ambientLightIntensity: 0.75,
-    directionalLightIntensity: 2.75,
-    directionalLightPosition: [10, 10, 5],
-    camera: {
-      fov: 30,
-      near: 1,
-      far: 2000,
-      position: {z: 35}
-    },
-    controls: {
-      minDistance: 1,
-      maxDistance: 1000
-    }
-  };
-  private readonly scene = new Scene();
-  private camera!: PerspectiveCamera;
-  private webGLRenderer?: WebGLRenderer;
-  private controls?: OrbitControls;
-  private mugMaterialsMap: Map<keyof typeof MugParts, MeshPhysicalMaterial> = new Map();
-  private readonly lights = {
-    ambient: new AmbientLight(0xffffff, this.sceneConfig.ambientLightIntensity),
-    directional: new DirectionalLight(0xffffff, this.sceneConfig.directionalLightIntensity)
-  };
+  private readonly sceneConfig = inject(SceneConfigService).sceneConfig;
+  
+  private scene = new Scene();
+  private camera = new PerspectiveCamera();
+  private renderer = new WebGLRenderer();
 
-  @Input() isMugMoving = true;
+  async ngOnInit(): Promise<void> {
+    const {width, height} = this.getCanvasDimensions();
 
-  ngAfterViewInit(): void {
-    this.canvasElement = this.renderer2.selectRootElement(this.canvas.nativeElement, true) as HTMLCanvasElement;
-    this.camera = this.initCamera();
+    this.initCamera(width, height);
+    this.initRenderer(width, height);
+    this.initOrbitControls();
 
-    if (isPlatformBrowser(this.platformId)) {
-      this.initScene();
-    }
-  }
+    const directionalLight: DirectionalLight = this.initDirectionalLight();
+    const ambientLight: AmbientLight = new AmbientLight(this.sceneConfig.lights.color, this.sceneConfig.lights.ambient.intensity);
 
-  private initCamera(): PerspectiveCamera {
-    const {fov, near, far, position} = this.sceneConfig.camera;
-    const camera = new PerspectiveCamera(fov, this.canvasElement.clientWidth / this.canvasElement.clientHeight, near, far);
-    camera.position.z = position.z;
-    return camera;
-  }
+    this.camera.add(directionalLight);
+    this.scene.add(this.camera);
+    this.scene.add(ambientLight);
+    this.scene.add((await loadModel(MugModelPath)).scene);
 
-  private async initScene(): Promise<void> {
-    await this.setupLights();
-    await this.setupRenderer();
-    await this.setupControls();
-    await this.loadMugModel();
     this.animate();
   }
 
-  private async setupLights(): Promise<void> {
-    const {directional} = this.lights;
-    directional.color.setHSL(0.1, 1, 0.95);
-    directional.position.set(-1, 1.75, 1);
-    directional.position.multiplyScalar(30);
-    this.camera.add(directional);
+  @HostListener('window:resize')
+  onResize() {
+    const {width, height} = this.getCanvasDimensions();
 
-    this.scene.add(this.camera);
-    this.scene.add(this.lights.ambient);
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(width, height);
   }
 
-  private async setupRenderer(): Promise<void> {
-    this.webGLRenderer = new WebGLRenderer({
-      canvas: this.canvasElement,
-      antialias: true
+  private getCanvasDimensions(): CanvasDimensions {
+    return {
+      width: this.canvas.nativeElement.clientWidth,
+      height: this.canvas.nativeElement.clientHeight
+    }
+  }
+
+  private initCamera(width: number, height: number): void {
+    const {fov, near, far, position} = this.sceneConfig.camera;
+    this.camera.fov = fov;
+    this.camera.aspect = width / height;
+    this.camera.near = near;
+    this.camera.far = far;
+    this.camera.position.z = position.z;
+    this.camera.updateProjectionMatrix();
+  }
+
+  private initRenderer(width: number, height: number): void {
+    const {antialias, localClippingEnabled, backgroundColor} = this.sceneConfig.renderer;
+    this.renderer = new WebGLRenderer({
+      canvas: this.canvas.nativeElement,
+      antialias
     });
 
-    this.webGLRenderer.setPixelRatio(window.devicePixelRatio);
-    this.webGLRenderer.setClearColor(0xFFFFFF);
-    this.webGLRenderer.setSize(window.innerWidth, window.innerHeight);
-    this.webGLRenderer.localClippingEnabled = true;
+    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.setClearColor(backgroundColor);
+    this.renderer.setSize(width, height);
+    this.renderer.localClippingEnabled = localClippingEnabled;
   }
 
-  private async setupControls(): Promise<void> {
-    if (!this.webGLRenderer) return;
+  private initDirectionalLight(): DirectionalLight {
+    const {intensity, h, s, l, position, scale} = this.sceneConfig.lights.directional;
+    const directionalLight = new DirectionalLight(this.sceneConfig.lights.color, intensity);
 
-    this.controls = new OrbitControls(this.camera, this.webGLRenderer.domElement);
-    this.controls.minDistance = this.sceneConfig.controls.minDistance;
-    this.controls.maxDistance = this.sceneConfig.controls.maxDistance;
-    this.controls.enablePan = false;
+    directionalLight.color.setHSL(h, s, l);
+    directionalLight.position.set(position.x, position.y, position.z);
+    directionalLight.position.multiplyScalar(scale);
+
+    return directionalLight;
   }
 
-  private async loadMugModel(): Promise<void> {
-    const mug: GLTF = await loadModel(MugModelPath);
+  private initOrbitControls(): void {
+    const {minDistance, maxDistance, enablePan} = this.sceneConfig.controls;
 
-    Object.keys(MugParts).forEach((key: string): void => {
-      const partKey = key as MugPartKey;
-      this.mugMaterialsMap.set(partKey, this.getMeshMaterial(mug, MugParts[partKey]));
-    });
-
-    this.scene.add(mug.scene);
-  }
-
-  private getMeshMaterial(gltf: GLTF, name: string): MeshPhysicalMaterial {
-    const mesh = gltf.scene.getObjectByName(name) as Mesh | null;
-    return mesh?.material as MeshPhysicalMaterial;
+    const controls = new OrbitControls(this.camera, this.renderer.domElement);
+    controls.minDistance = minDistance;
+    controls.maxDistance = maxDistance;
+    controls.enablePan = enablePan;
   }
 
   private animate = (): void => {
@@ -139,45 +110,7 @@ export class MugComponent implements AfterViewInit {
       if (mug) mug.rotation.y += 0.01;
     }
 
-    this.render();
-  }
-
-  private render(): void {
-    if (!this.webGLRenderer || !this.canvasElement) return;
-
-    this.onWindowResize(this.canvasElement.clientWidth, this.canvasElement.clientHeight);
-    this.webGLRenderer.render(this.scene, this.camera);
-  }
-
-  private onWindowResize(width: number, height: number): void {
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
-    this.webGLRenderer?.setSize(width, height);
-  }
-
-  public getMaterialByPart(part: MugPartKey): MeshPhysicalMaterial | undefined {
-    return this.mugMaterialsMap.get(part);
-  }
-
-  public async setLogo(texture: string): Promise<void> {
-    const logoMaterial = this.getMaterialByPart('LOGO');
-
-    if (logoMaterial) {
-      const textureMap: CanvasTexture = await loadTexture(texture);
-      textureMap.flipY = false;
-      logoMaterial.map = textureMap;
-      logoMaterial.needsUpdate = true;
-    }
-  }
-
-  public updateMaterial(part: MugPartKey, color: string): void {
-    const material = this.getMaterialByPart(part);
-
-    if (material) {
-      const colorRGB = parseInt(color.replace("#", "0x"), 16);
-      material.color.setHex(colorRGB, SRGBColorSpace);
-      material.needsUpdate = true;
-    }
+    this.renderer.render(this.scene, this.camera);
   }
 
 }

@@ -1,68 +1,78 @@
-import {Component, signal, ViewChild} from '@angular/core';
-import {MugComponent} from "./components/mug/mug.component";
+import {Component, inject, OnInit, ViewChild} from '@angular/core';
+import {Button} from "primeng/button";
+import {animate, state, style, transition, trigger} from "@angular/animations";
+import {SidebarState} from "./app.types";
+import {BreakpointObserver} from '@angular/cdk/layout';
+import {NgIf} from "@angular/common";
 import {SidebarComponent} from "./components/sidebar/sidebar.component";
-import {ColorChangeEvent, FileValidationError, MugPartKey} from "./app.types";
-import {isFileSizeInvalid, isFileTypeInvalid, readFileAsString} from "./utils/file.utils";
-import {ToolbarComponent} from "./components/toolbar/toolbar.component";
+import {MugComponent} from "./components/mug/mug.component";
 
 @Component({
   imports: [
+    Button,
+    NgIf,
     SidebarComponent,
-    MugComponent,
-    ToolbarComponent
+    MugComponent
   ],
   selector: 'app-root',
   standalone: true,
   styleUrl: './app.component.scss',
+  animations: [
+    trigger('slideIn', [
+      state(SidebarState.Open, style({
+        transform: 'translateX(0px)',
+      })),
+      state(SidebarState.Closed, style({
+        transform: 'translateX(-100%)'
+      })),
+      transition('open => closed', animate('300ms ease-in')),
+      transition('closed => open', animate('300ms ease-out'))
+    ]),
+    trigger('fadeInOut', [
+      state('void', style({opacity: 0})),
+      transition('void => *', [
+        animate('300ms ease-in-out')
+      ]),
+      transition('* => void', [
+        animate('300ms ease-in-out')
+      ])
+    ])
+  ],
   template: `
-    <div class="relative">
-      <app-toolbar/>
-      <app-mug [isMugMoving]="isMugMoving()"/>
+    <div class="h-screen flex bg-surface-50">
+      <p-button (click)="toggleSidebar()" *ngIf="isSmallScreen" [@fadeInOut]="'*'" [raised]="true"
+                [rounded]="true"
+                class="absolute top-2 right-2 z-20" icon="pi pi-bars" size="large"/>
+      <app-sidebar
+        [@slideIn]="sidebarState"
+        class="shrink-0 absolute lg:static h-screen bg-surface-0 rounded-r-xl lg:rounded-r-none shadow-md lg:shadow-none select-none z-10 p-4"
+        style="width: 280px"/>
+      <app-mug [isMugMoving]="true" class="grow"/>
     </div>
   `
 })
-export class AppComponent {
-  title: string = 'mug-maker';
-
-  @ViewChild(MugComponent) mugComponent!: MugComponent;
+export class AppComponent implements OnInit {
   @ViewChild(SidebarComponent) sidebarComponent!: SidebarComponent;
 
-  isMugMoving = signal(true);
+  title = 'mug-maker';
 
-  handleLogoUpload($event: Event): void {
-    const input = $event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
+  protected isSmallScreen = false;
+  protected sidebarState = SidebarState.Closed;
 
-    if (this.validateFile(file)) {
-      readFileAsString(file, (result: string): void => {
-        this.sidebarComponent.uploadedLogoName = file.name;
-        this.mugComponent.setLogo(result);
-      });
-    }
+  private readonly breakpointObserver = inject(BreakpointObserver);
+
+  ngOnInit(): void {
+    this.breakpointObserver.observe(['(max-width: 1024px)']).subscribe(({matches}) => {
+      this.isSmallScreen = matches;
+      if (!matches) {
+        this.sidebarState = SidebarState.Open;
+      }
+    });
   }
 
-  validateFile(file: File): boolean {
-    this.sidebarComponent.clearErrorMessages();
-
-    const validations: FileValidationError[] = [
-      isFileSizeInvalid(file),
-      isFileTypeInvalid(file)
-    ];
-
-    const validationErrors = validations
-      .filter(validation => !validation.isValid)
-      .map(validation => validation.message);
-
-    if (validationErrors.length > 0) {
-      this.sidebarComponent.pushErrorMessages(validationErrors);
-      return false;
-    }
-
-    return true;
+  protected toggleSidebar(): void {
+    this.sidebarState = this.sidebarState === SidebarState.Closed ? SidebarState.Open : SidebarState.Closed;
   }
 
-  onColorChange(colorChangeEvent: ColorChangeEvent): void {
-    this.mugComponent.updateMaterial(colorChangeEvent.key as MugPartKey, colorChangeEvent.color);
-  }
 }
+
