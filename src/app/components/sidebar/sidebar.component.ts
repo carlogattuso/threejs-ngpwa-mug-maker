@@ -68,7 +68,7 @@ import {FormsModule} from "@angular/forms";
 export class SidebarComponent {
   @Input() isMugRotating = true;
   @Output() colorChanged = new EventEmitter<ColorChangeEvent>();
-  @Output() isMugRotatingChange = new EventEmitter<boolean>();
+  @Output() mugRotationChange = new EventEmitter<boolean>();
   @Output() logoUploaded = new EventEmitter<Event>();
 
   protected mugRotationOptions: RotationState[] = [
@@ -101,6 +101,6 @@ export class SidebarComponent {
   }
 
   onMugRotationChange(state: boolean) {
-    this.isMugRotatingChange.emit(state)
+    this.mugRotationChange.emit(state)
   }
 }
