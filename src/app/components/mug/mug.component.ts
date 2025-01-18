@@ -15,12 +15,12 @@ import {CanvasDimensions} from "../../app.types";
   `
 })
 export class MugComponent implements OnInit {
-  @Input() isMugMoving = true;
+  @Input() isMugRotating = true;
 
   @ViewChild('canvas', {static: true})
   private readonly canvas!: ElementRef<HTMLCanvasElement>;
   private readonly sceneConfig = inject(SceneConfigService).sceneConfig;
-  
+
   private scene = new Scene();
   private camera = new PerspectiveCamera();
   private renderer = new WebGLRenderer();
@@ -105,7 +105,7 @@ export class MugComponent implements OnInit {
   private animate = (): void => {
     requestAnimationFrame(this.animate);
 
-    if (this.isMugMoving) {
+    if (this.isMugRotating) {
       const mug = this.scene.getObjectByName(SceneObjects.MUG);
       if (mug) mug.rotation.y += 0.01;
     }

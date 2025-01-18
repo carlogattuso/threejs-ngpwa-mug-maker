@@ -51,8 +51,9 @@ import {FormsModule} from "@angular/forms";
     </p-divider>
 
     <p-selectButton
-      [options]="mugRotationStates"
-      [(ngModel)]="isMugMoving"
+      [options]="mugRotationOptions"
+      [ngModel]="isMugRotating"
+      (ngModelChange)="onMugRotationChange($event)"
       optionLabel="label"
       optionValue="value"
       [allowEmpty]="false"/>
@@ -65,10 +66,12 @@ import {FormsModule} from "@angular/forms";
   `
 })
 export class SidebarComponent {
-  @Input() isMugMoving = true;
+  @Input() isMugRotating = true;
   @Output() colorChanged = new EventEmitter<ColorChangeEvent>();
+  @Output() isMugRotatingChange = new EventEmitter<boolean>();
   @Output() logoUploaded = new EventEmitter<Event>();
-  protected mugRotationStates: RotationState[] = [
+
+  protected mugRotationOptions: RotationState[] = [
     {
       label: RotationStateLabel.On,
       value: true
@@ -78,7 +81,8 @@ export class SidebarComponent {
     }
   ];
   protected _errorMessages: string[] = [];
-  protected _uploadedLogoName: string | undefined;
+  protected _uploadedLogoName: string | undefined
+
   private readonly renderer2: Renderer2 = inject(Renderer2);
 
   downloadTemplate(): void {
@@ -96,4 +100,7 @@ export class SidebarComponent {
     this.colorChanged.emit(color);
   }
 
+  onMugRotationChange(state: boolean) {
+    this.isMugRotatingChange.emit(state)
+  }
 }
