@@ -1,6 +1,6 @@
 import {Component, EventEmitter, inject, Input, Output, Renderer2} from '@angular/core';
 import {Button} from "primeng/button";
-import {ColorPickerFormComponent} from "../color-picker-form/color-picker-form.component";
+import {ColorPickerFormComponent} from "../../shared/ui/color-picker-form/color-picker-form.component";
 import {Divider} from "primeng/divider";
 import {Message} from "primeng/message";
 import {Location, NgForOf, NgIf} from "@angular/common";

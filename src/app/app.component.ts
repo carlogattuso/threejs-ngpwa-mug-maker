@@ -3,8 +3,8 @@ import {Button} from "primeng/button";
 import {SidebarState} from "./app.types";
 import {BreakpointObserver} from '@angular/cdk/layout';
 import {NgIf} from "@angular/common";
-import {SidebarComponent} from "./components/sidebar/sidebar.component";
-import {MugComponent} from "./components/mug/mug.component";
+import {SidebarComponent} from "./features/sidebar/sidebar.component";
+import {MugComponent} from "./features/mug/mug.component";
 import {fadeInOutAnimation, slideInAnimation} from "./app.animations";
 import {LayoutComponent} from "./layout/layout.component";
 
