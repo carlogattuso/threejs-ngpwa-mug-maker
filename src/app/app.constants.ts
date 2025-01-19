@@ -16,6 +16,8 @@ export const DefaultLogoPath = 'glb';
 
 export const DefaultLogoFilename = 'logo.png';
 
+export const DefaultLogo = 'glb/default.png';
+
 export const DefaultMaterialColor = '#FFFFFF';
 
 export const MaxFileSizeInMB = 10;

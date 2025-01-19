@@ -2,7 +2,6 @@ import {Component, ElementRef, HostListener, inject, Input, OnInit, ViewChild} f
 import {
   AmbientLight,
   DirectionalLight,
-  Mesh,
   MeshPhysicalMaterial,
   PerspectiveCamera,
   Scene,
@@ -10,7 +9,7 @@ import {
   WebGLRenderer
 } from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls.js";
-import {loadModel} from "../../utils/three.utils";
+import {findMeshMaterial, loadModel} from "../../utils/three.utils";
 import {MugModelPath, MugParts, SceneObjects} from "../../app.constants";
 import {SceneConfigService} from "../../services/scene-config.service";
 import {CanvasDimensions, ColorChangeEvent, MugPartKey} from "../../app.types";
@@ -126,17 +125,12 @@ export class MugComponent implements OnInit {
     this.renderer.render(this.scene, this.camera);
   }
 
-  private getMeshMaterial(gltf: GLTF, name: string): MeshPhysicalMaterial {
-    const mesh = gltf.scene.getObjectByName(name) as Mesh | null;
-    return mesh?.material as MeshPhysicalMaterial;
-  }
-
   private async initModel(): Promise<GLTF> {
     const mug: GLTF = await loadModel(MugModelPath);
 
     Object.keys(MugParts).forEach((key: string): void => {
       const partKey = key as MugPartKey;
-      this.mugMaterialsMap.set(partKey, this.getMeshMaterial(mug, MugParts[partKey]));
+      this.mugMaterialsMap.set(partKey, findMeshMaterial(mug, MugParts[partKey]));
     });
 
     return mug;
