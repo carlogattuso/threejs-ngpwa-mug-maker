@@ -1,10 +1,20 @@
 import {Component, ElementRef, HostListener, inject, Input, OnInit, ViewChild} from '@angular/core';
-import {AmbientLight, DirectionalLight, PerspectiveCamera, Scene, WebGLRenderer} from "three";
+import {
+  AmbientLight,
+  DirectionalLight,
+  Mesh,
+  MeshPhysicalMaterial,
+  PerspectiveCamera,
+  Scene,
+  SRGBColorSpace,
+  WebGLRenderer
+} from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls.js";
 import {loadModel} from "../../utils/three.utils";
-import {MugModelPath, SceneObjects} from "../../app.constants";
+import {MugModelPath, MugParts, SceneObjects} from "../../app.constants";
 import {SceneConfigService} from "../../services/scene-config.service";
-import {CanvasDimensions} from "../../app.types";
+import {CanvasDimensions, ColorChangeEvent, MugPartKey} from "../../app.types";
+import {GLTF} from "three/examples/jsm/loaders/GLTFLoader.js";
 
 @Component({
   selector: 'app-mug',
@@ -20,6 +30,7 @@ export class MugComponent implements OnInit {
   @ViewChild('canvas', {static: true})
   private readonly canvas!: ElementRef<HTMLCanvasElement>;
   private readonly sceneConfig = inject(SceneConfigService).sceneConfig;
+  private readonly mugMaterialsMap: Map<keyof typeof MugParts, MeshPhysicalMaterial> = new Map();
 
   private scene = new Scene();
   private camera = new PerspectiveCamera();
@@ -38,7 +49,9 @@ export class MugComponent implements OnInit {
     this.camera.add(directionalLight);
     this.scene.add(this.camera);
     this.scene.add(ambientLight);
-    this.scene.add((await loadModel(MugModelPath)).scene);
+
+    const mug: GLTF = await this.initModel();
+    this.scene.add(mug.scene);
 
     this.animate();
   }
@@ -111,6 +124,34 @@ export class MugComponent implements OnInit {
     }
 
     this.renderer.render(this.scene, this.camera);
+  }
+
+  private getMeshMaterial(gltf: GLTF, name: string): MeshPhysicalMaterial {
+    const mesh = gltf.scene.getObjectByName(name) as Mesh | null;
+    return mesh?.material as MeshPhysicalMaterial;
+  }
+
+  private async initModel(): Promise<GLTF> {
+    const mug: GLTF = await loadModel(MugModelPath);
+
+    Object.keys(MugParts).forEach((key: string): void => {
+      const partKey = key as MugPartKey;
+      this.mugMaterialsMap.set(partKey, this.getMeshMaterial(mug, MugParts[partKey]));
+    });
+
+    return mug;
+  }
+
+  public updateMugColor(colorChangeEvent: ColorChangeEvent): void {
+    const {key, color} = {key: colorChangeEvent.key as MugPartKey, color: colorChangeEvent.color};
+
+    const material = this.mugMaterialsMap.get(key);
+
+    if (material) {
+      const colorRGB = parseInt(color.replace("#", "0x"), 16);
+      material.color.setHex(colorRGB, SRGBColorSpace);
+      material.needsUpdate = true;
+    }
   }
 
 }

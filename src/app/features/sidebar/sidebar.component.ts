@@ -62,7 +62,7 @@ import {FormsModule} from "@angular/forms";
       <span class="font-medium">Color</span>
     </p-divider>
 
-    <app-color-picker-form (colorChange)="onColorChange($event)"/>
+    <app-color-picker-form (colorChanged)="this.colorChanged.emit($event)"/>
   `
 })
 export class SidebarComponent {
@@ -94,10 +94,6 @@ export class SidebarComponent {
 
   onLogoUploaded(event: Event) {
     this.logoUploaded.emit(event);
-  }
-
-  onColorChange(color: ColorChangeEvent) {
-    this.colorChanged.emit(color);
   }
 
   onMugRotationChange(state: boolean) {
