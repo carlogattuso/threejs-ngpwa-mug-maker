@@ -6,6 +6,7 @@ import {NgFor} from "@angular/common";
 import {Button} from "primeng/button";
 import {ColorChangeEvent, ColorPickerControl} from "../../../app.types";
 import {DefaultMaterialColor, MugParts} from "../../../app.constants";
+import {FlexChipListComponent} from "../../../layout/flex-chip-list/flex-chip-list.component";
 
 @Component({
   selector: 'app-color-picker-form',
@@ -15,12 +16,13 @@ import {DefaultMaterialColor, MugParts} from "../../../app.constants";
     ColorPicker,
     ReactiveFormsModule,
     NgFor,
-    Button
+    Button,
+    FlexChipListComponent
   ],
   template: `
     <form [formGroup]="mugColorsFormGroup">
-      <div class="flex flex-wrap gap-2 mb-4">
-        <p-chip *ngFor="let part of mugColorsControls">
+      <app-flex-chip-list>
+        <p-chip chip-list *ngFor="let part of mugColorsControls">
             <span class="flex items-center justify-center">
                 <p-colorPicker
                   [formControlName]="part.controlName"
@@ -31,7 +33,7 @@ import {DefaultMaterialColor, MugParts} from "../../../app.constants";
                 {{ part.label }}
             </span>
         </p-chip>
-      </div>
+      </app-flex-chip-list>
     </form>
     <p-button label="Reset colors" size="small" icon="pi pi-eraser" styleClass="w-full"
               (click)="resetColors()"
