@@ -1,13 +1,9 @@
 /* You can add global styles to this file, and also import other style files */
-@import "primeng/resources/themes/aura-light-blue/theme.css";
-@import "primeng/resources/primeng.min.css";
 @import "primeicons/primeicons.css";
-@import "primeflex/primeflex.min.css";
 
 html, body {
   font-size: 14px;
   scroll-behavior: smooth;
-  background-color: #F9FAFB;
   padding: 0;
   margin: 0;
   width: 100%;
@@ -16,6 +12,14 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-canvas {
-  display: block;
+@layer tailwind-base, primeng, tailwind-utilities;
+
+@layer tailwind-base {
+  @tailwind base;
 }
+
+@layer tailwind-utilities {
+  @tailwind components;
+  @tailwind utilities;
+}
+
