@@ -36,7 +36,7 @@ import {capitalizeFirstLetter} from "../../../utils/utils";
         </p-chip>
       </app-flex-chip-list>
     </form>
-    <p-button label="Reset colors" size="small" icon="pi pi-eraser" styleClass="w-full"
+    <p-button label="Reset colors" size="small" icon="pi pi-eraser" styleClass="mt-4 w-full"
               (click)="resetColors()"
               [disabled]="!mugColorsFormGroup.dirty"/>
   `,
