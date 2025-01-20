@@ -8,6 +8,8 @@ import {SelectButton} from "primeng/selectbutton";
 import {DefaultLogoFilename, DefaultLogoPath} from "../../app.constants";
 import {ColorChangeEvent, RotationState, RotationStateLabel} from "../../app.types";
 import {FormsModule} from "@angular/forms";
+import {FlexButtonListComponent} from "../../layout/flex-button-list/flex-button-list.component";
+import {UploadFileButtonComponent} from "../../shared/ui/upload-file-button/upload-file-button.component";
 
 @Component({
   selector: 'app-sidebar',
@@ -20,30 +22,20 @@ import {FormsModule} from "@angular/forms";
     NgForOf,
     NgIf,
     SelectButton,
-    FormsModule
+    FormsModule,
+    FlexButtonListComponent,
+    UploadFileButtonComponent
   ],
   template: `
     <p-divider align="left" type="solid">
       <span class="font-medium">Design</span>
     </p-divider>
 
-    <div class="flex flex-col gap-2">
-      <p-button [label]="_uploadedLogoName ?  _uploadedLogoName : 'Upload your design'" icon="pi pi-upload"
-                (click)="fileInput.click()" styleClass="w-full"/>
-
-      <ng-container *ngFor="let text of _errorMessages;">
-        <p-message
-          severity="error"
-          variant="simple"
-          styleClass="flex flex-col items-center"
-          [text]="text"/>
-      </ng-container>
-
-      <input type="file" #fileInput accept="image/png" style="display: none"
-             (change)="onLogoUploaded($event)"/>
+    <app-flex-button-list>
+      <app-upload-file-button (fileUploaded)="fileUploaded.emit($event)"/>
       <p-button label="Download template" severity="secondary" icon="pi pi-download"
                 (click)="downloadTemplate()" styleClass="w-full"/>
-    </div>
+    </app-flex-button-list>
 
     <p-divider align="left" type="solid">
       <span class="font-medium">Rotation</span>
@@ -67,8 +59,8 @@ import {FormsModule} from "@angular/forms";
 export class SidebarComponent {
   @Input() isMugRotating = true;
   @Output() colorChanged = new EventEmitter<ColorChangeEvent>();
+  @Output() fileUploaded = new EventEmitter<File>();
   @Output() mugRotationChange = new EventEmitter<boolean>();
-  @Output() logoUploaded = new EventEmitter<Event>();
 
   protected mugRotationOptions: RotationState[] = [
     {
@@ -79,8 +71,6 @@ export class SidebarComponent {
       value: false
     }
   ];
-  protected _errorMessages: string[] = [];
-  protected _uploadedLogoName: string | undefined
 
   private readonly renderer2: Renderer2 = inject(Renderer2);
 
@@ -89,10 +79,6 @@ export class SidebarComponent {
     this.renderer2.setAttribute(anchorElement, 'href', Location.joinWithSlash(DefaultLogoPath, DefaultLogoFilename));
     this.renderer2.setAttribute(anchorElement, 'download', DefaultLogoFilename);
     anchorElement.click();
-  }
-
-  onLogoUploaded(event: Event) {
-    this.logoUploaded.emit(event);
   }
 
   onMugRotationChange(state: boolean) {

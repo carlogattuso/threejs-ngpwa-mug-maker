@@ -1,6 +1,7 @@
 import {Component, ElementRef, HostListener, inject, Input, OnInit, ViewChild} from '@angular/core';
 import {
   AmbientLight,
+  CanvasTexture,
   DirectionalLight,
   MeshPhysicalMaterial,
   PerspectiveCamera,
@@ -9,18 +10,19 @@ import {
   WebGLRenderer
 } from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls.js";
-import {findMeshMaterial, loadModel} from "../../utils/three.utils";
+import {findMeshMaterial, loadModel, loadTexture} from "../../utils/three.utils";
 import {MugModelPath, MugParts, SceneObjects} from "../../app.constants";
 import {SceneConfigService} from "../../services/scene-config.service";
 import {CanvasDimensions, ColorChangeEvent, MugPartKey} from "../../app.types";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader.js";
+import {readFileAsString} from "../../utils/file.utils";
 
 @Component({
   selector: 'app-mug',
   standalone: true,
   imports: [],
   template: `
-    <canvas #canvas class="!h-screen !w-full"></canvas>
+    <canvas #canvas class="!h-full !w-full"></canvas>
   `
 })
 export class MugComponent implements OnInit {
@@ -145,6 +147,20 @@ export class MugComponent implements OnInit {
       const colorRGB = parseInt(color.replace("#", "0x"), 16);
       material.color.setHex(colorRGB, SRGBColorSpace);
       material.needsUpdate = true;
+    }
+  }
+
+  public updateMugLogo(file: File): void {
+    const logoMaterial = this.mugMaterialsMap.get('LOGO');
+
+    if (logoMaterial) {
+      readFileAsString(file, (result: string): void => {
+        loadTexture(result).then((textureMap: CanvasTexture): void => {
+          textureMap.flipY = false;
+          logoMaterial.map = textureMap;
+          logoMaterial.needsUpdate = true;
+        });
+      });
     }
   }
 

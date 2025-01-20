@@ -30,7 +30,8 @@ import {LayoutComponent} from "./layout/layout.component";
                    class="shrink-0 absolute lg:static h-screen bg-surface-0 rounded-r-xl lg:rounded-r-none shadow-md lg:shadow-none select-none z-10 p-4"
                    sidebar
                    style="width: 280px"
-                   (mugRotationChange)="isMugRotating = $event" (colorChanged)="onColorChanged($event)"/>
+                   (mugRotationChange)="isMugRotating = $event" (colorChanged)="onColorChanged($event)"
+                   (fileUploaded)="onFileUploaded($event)"/>
 
       <app-mug [isMugRotating]="isMugRotating" class="grow" main/>
 
@@ -63,6 +64,10 @@ export class AppComponent implements OnInit {
 
   onColorChanged(color: ColorChangeEvent): void {
     this.mugComponent.updateMugColor(color);
+  }
+
+  onFileUploaded(file: File): void {
+    this.mugComponent.updateMugLogo(file);
   }
 
 }
