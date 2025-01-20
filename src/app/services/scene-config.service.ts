@@ -29,7 +29,7 @@ export class SceneConfigService {
       fov: 30,
       near: 1,
       far: 2000,
-      position: {z: 50},
+      position: {z: 35},
     },
     renderer: {
       backgroundColor: 0xf8fafc,
@@ -39,7 +39,7 @@ export class SceneConfigService {
     controls: {
       minDistance: 1,
       maxDistance: 1000,
-      enablePan: true
+      enablePan: false
     },
   };
 
