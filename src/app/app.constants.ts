@@ -20,7 +20,7 @@ export const DefaultLogo = 'glb/default.png';
 
 export const DefaultMaterialColor = '#FFFFFF';
 
-export const MaxFileSizeInMB = 10;
+export const MaxFileSizeInMB = 1;
 
 export const AllowedFileExtensions = ['image/png'];
 

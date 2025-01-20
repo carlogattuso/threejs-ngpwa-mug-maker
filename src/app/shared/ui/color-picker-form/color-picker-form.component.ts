@@ -23,11 +23,11 @@ import {capitalizeFirstLetter} from "../../../utils/utils";
   template: `
     <form [formGroup]="mugColorsFormGroup">
       <app-flex-chip-list>
-        <p-chip chip-list *ngFor="let part of mugColorsControls">
+        <p-chip chip-list *ngFor="let part of mugColorsControls" styleClass="flex items-center p-2">
             <span class="flex items-center justify-center">
-                <p-colorPicker
-                  [formControlName]="part.controlName"
-                  (onChange)="emitColorChange(part.key, $event)">
+                <p-colorPicker styleClass="caret-transparent select-none"
+                               [formControlName]="part.controlName"
+                               (onChange)="emitColorChange(part.key, $event)">
                 </p-colorPicker>
             </span>
           <span class="mx-2 font-medium">
@@ -39,8 +39,7 @@ import {capitalizeFirstLetter} from "../../../utils/utils";
     <p-button label="Reset colors" size="small" icon="pi pi-eraser" styleClass="mt-4 w-full"
               (click)="resetColors()"
               [disabled]="!mugColorsFormGroup.dirty"/>
-  `,
-  styleUrl: './color-picker-form.component.scss'
+  `
 })
 export class ColorPickerFormComponent {
   mugColorsFormGroup: FormGroup;

@@ -18,7 +18,6 @@ import {LayoutComponent} from "./layout/layout.component";
   ],
   selector: 'app-root',
   standalone: true,
-  styleUrl: './app.component.scss',
   animations: [fadeInOutAnimation, slideInAnimation],
   template: `
     <app-layout>

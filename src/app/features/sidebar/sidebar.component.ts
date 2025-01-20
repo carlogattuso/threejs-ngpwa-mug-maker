@@ -22,7 +22,6 @@ import {FormsModule} from "@angular/forms";
     SelectButton,
     FormsModule
   ],
-  styleUrl: './sidebar.component.scss',
   template: `
     <p-divider align="left" type="solid">
       <span class="font-medium">Design</span>
@@ -62,7 +61,7 @@ import {FormsModule} from "@angular/forms";
       <span class="font-medium">Color</span>
     </p-divider>
 
-    <app-color-picker-form (colorChanged)="this.colorChanged.emit($event)"/>
+    <app-color-picker-form (colorChanged)="colorChanged.emit($event)"/>
   `
 })
 export class SidebarComponent {
