@@ -5,7 +5,7 @@ import {BreakpointObserver} from '@angular/cdk/layout';
 import {NgIf} from "@angular/common";
 import {SidebarComponent} from "./features/sidebar/sidebar.component";
 import {MugComponent} from "./features/mug/mug.component";
-import {fadeInOutAnimation, slideInAnimation} from "./app.animations";
+import {fadeInOutAnimation, iconAnimation, slideInAnimation} from "./app.animations";
 import {LayoutComponent} from "./layout/layout.component";
 
 @Component({
@@ -18,13 +18,14 @@ import {LayoutComponent} from "./layout/layout.component";
   ],
   selector: 'app-root',
   standalone: true,
-  animations: [fadeInOutAnimation, slideInAnimation],
+  animations: [fadeInOutAnimation, slideInAnimation, iconAnimation],
   template: `
     <app-layout>
 
-      <p-button (click)="toggleSidebar()" *ngIf="isSmallScreen" [@fadeInOut]="'*'" [raised]="true" [rounded]="true"
+      <p-button (click)="toggleSidebar()" *ngIf="isSmallScreen" [@icon]="sidebarState" [@fadeInOut]="'*'"
+                [raised]="true" [rounded]="true"
                 class="absolute top-2 right-2 z-20"
-                icon="pi pi-bars" sidebar size="large"/>
+                icon="pi pi-plus" sidebar size="large"/>
 
       <app-sidebar [@slideIn]="sidebarState"
                    class="shrink-0 absolute lg:static h-screen bg-surface-0 rounded-r-xl lg:rounded-r-none shadow-md lg:shadow-none select-none z-10 p-4"

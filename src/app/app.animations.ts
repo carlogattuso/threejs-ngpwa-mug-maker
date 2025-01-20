@@ -21,3 +21,13 @@ export const slideInAnimation = trigger('slideIn', [
   transition('open => closed', animate('300ms ease-in')),
   transition('closed => open', animate('300ms ease-out'))
 ]);
+
+export const iconAnimation = trigger('icon', [
+  state(SidebarState.Open, style({
+    transform: 'rotate(45deg)'
+  })),
+  state(SidebarState.Closed, style({
+    transform: 'rotate(0deg)'
+  })),
+  transition('* => *', animate('300ms ease-in-out'))
+]);
