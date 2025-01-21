@@ -32,7 +32,8 @@ export class SceneConfigService {
       position: {z: 35},
     },
     renderer: {
-      backgroundColor: 0xf8fafc,
+      backgroundColorLight: 0xf8fafc,
+      backgroundColorDark: 0x09090B,
       localClippingEnabled: true,
       antialias: true
     },

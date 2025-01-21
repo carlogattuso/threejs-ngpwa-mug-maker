@@ -1,4 +1,4 @@
-import {Component, ElementRef, HostListener, inject, Input, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, HostListener, inject, Input, ViewChild} from '@angular/core';
 import {
   AmbientLight,
   CanvasTexture,
@@ -25,19 +25,18 @@ import {readFileAsString} from "../../utils/file.utils";
     <canvas #canvas class="!h-full !w-full"></canvas>
   `
 })
-export class MugComponent implements OnInit {
+export class MugComponent implements AfterViewInit {
   @Input() isMugRotating = true;
 
-  @ViewChild('canvas', {static: true})
-  private readonly canvas!: ElementRef<HTMLCanvasElement>;
-  private readonly sceneConfig = inject(SceneConfigService).sceneConfig;
+  @ViewChild('canvas') private readonly canvas!: ElementRef<HTMLCanvasElement>;
+  private readonly sceneConfigService = inject(SceneConfigService).sceneConfig;
   private readonly mugMaterialsMap: Map<keyof typeof MugParts, MeshPhysicalMaterial> = new Map();
 
   private scene = new Scene();
   private camera = new PerspectiveCamera();
   private renderer = new WebGLRenderer();
 
-  async ngOnInit(): Promise<void> {
+  async ngAfterViewInit(): Promise<void> {
     const {width, height} = this.getCanvasDimensions();
 
     this.initCamera(width, height);
@@ -45,7 +44,7 @@ export class MugComponent implements OnInit {
     this.initOrbitControls();
 
     const directionalLight: DirectionalLight = this.initDirectionalLight();
-    const ambientLight: AmbientLight = new AmbientLight(this.sceneConfig.lights.color, this.sceneConfig.lights.ambient.intensity);
+    const ambientLight: AmbientLight = new AmbientLight(this.sceneConfigService.lights.color, this.sceneConfigService.lights.ambient.intensity);
 
     this.camera.add(directionalLight);
     this.scene.add(this.camera);
@@ -74,7 +73,7 @@ export class MugComponent implements OnInit {
   }
 
   private initCamera(width: number, height: number): void {
-    const {fov, near, far, position} = this.sceneConfig.camera;
+    const {fov, near, far, position} = this.sceneConfigService.camera;
     this.camera.fov = fov;
     this.camera.aspect = width / height;
     this.camera.near = near;
@@ -84,21 +83,25 @@ export class MugComponent implements OnInit {
   }
 
   private initRenderer(width: number, height: number): void {
-    const {antialias, localClippingEnabled, backgroundColor} = this.sceneConfig.renderer;
+    const {
+      antialias,
+      localClippingEnabled,
+      backgroundColorLight
+    } = this.sceneConfigService.renderer;
     this.renderer = new WebGLRenderer({
       canvas: this.canvas.nativeElement,
       antialias
     });
 
     this.renderer.setPixelRatio(window.devicePixelRatio);
-    this.renderer.setClearColor(backgroundColor);
     this.renderer.setSize(width, height);
+    this.renderer.setClearColor(backgroundColorLight);
     this.renderer.localClippingEnabled = localClippingEnabled;
   }
 
   private initDirectionalLight(): DirectionalLight {
-    const {intensity, h, s, l, position, scale} = this.sceneConfig.lights.directional;
-    const directionalLight = new DirectionalLight(this.sceneConfig.lights.color, intensity);
+    const {intensity, h, s, l, position, scale} = this.sceneConfigService.lights.directional;
+    const directionalLight = new DirectionalLight(this.sceneConfigService.lights.color, intensity);
 
     directionalLight.color.setHSL(h, s, l);
     directionalLight.position.set(position.x, position.y, position.z);
@@ -108,7 +111,7 @@ export class MugComponent implements OnInit {
   }
 
   private initOrbitControls(): void {
-    const {minDistance, maxDistance, enablePan} = this.sceneConfig.controls;
+    const {minDistance, maxDistance, enablePan} = this.sceneConfigService.controls;
 
     const controls = new OrbitControls(this.camera, this.renderer.domElement);
     controls.minDistance = minDistance;

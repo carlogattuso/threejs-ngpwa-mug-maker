@@ -28,7 +28,8 @@ export type SceneConfig = {
     }
   },
   renderer: {
-    backgroundColor: number,
+    backgroundColorLight: number
+    backgroundColorDark: number
     localClippingEnabled: boolean,
     antialias: boolean
   }
