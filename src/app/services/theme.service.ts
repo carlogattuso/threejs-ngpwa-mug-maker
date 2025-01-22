@@ -19,7 +19,6 @@ export class ThemeService {
   constructor() {
     window.matchMedia('(prefers-color-scheme: dark)')
       .addEventListener('change', (event: MediaQueryListEvent): void => {
-        console.log(event.matches);
         this.isDarkMode = event.matches;
       });
   }

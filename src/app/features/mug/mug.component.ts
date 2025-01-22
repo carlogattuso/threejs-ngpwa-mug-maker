@@ -39,10 +39,7 @@ export class MugComponent implements AfterViewInit {
   private renderer = new WebGLRenderer();
 
   constructor() {
-    const {backgroundColorLight, backgroundColorDark} = this.sceneConfigService.renderer;
-    effect(() => {
-      this.renderer.setClearColor(this.themeService.isDarkMode ? backgroundColorDark : backgroundColorLight);
-    });
+    this.initRendererColor();
   }
 
   async ngAfterViewInit(): Promise<void> {
@@ -63,15 +60,6 @@ export class MugComponent implements AfterViewInit {
     this.scene.add(mug.scene);
 
     this.animate();
-  }
-
-  @HostListener('window:resize')
-  onResize() {
-    const {width, height} = this.getCanvasDimensions();
-
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
-    this.renderer.setSize(width, height);
   }
 
   private getCanvasDimensions(): CanvasDimensions {
@@ -104,6 +92,13 @@ export class MugComponent implements AfterViewInit {
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(width, height);
     this.renderer.localClippingEnabled = localClippingEnabled;
+  }
+
+  private initRendererColor() {
+    const {backgroundColorLight, backgroundColorDark} = this.sceneConfigService.renderer;
+    effect(() => {
+      this.renderer.setClearColor(this.themeService.isDarkMode ? backgroundColorDark : backgroundColorLight);
+    });
   }
 
   private initDirectionalLight(): DirectionalLight {
