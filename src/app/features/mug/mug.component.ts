@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, HostListener, inject, Input, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, effect, ElementRef, HostListener, inject, Input, ViewChild} from '@angular/core';
 import {
   AmbientLight,
   CanvasTexture,
@@ -16,6 +16,7 @@ import {SceneConfigService} from "../../services/scene-config.service";
 import {CanvasDimensions, ColorChangeEvent, MugPartKey} from "../../app.types";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader.js";
 import {readFileAsString} from "../../utils/file.utils";
+import {ThemeService} from "../../services/theme.service";
 
 @Component({
   selector: 'app-mug',
@@ -29,12 +30,20 @@ export class MugComponent implements AfterViewInit {
   @Input() isMugRotating = true;
 
   @ViewChild('canvas') private readonly canvas!: ElementRef<HTMLCanvasElement>;
+  private readonly themeService = inject(ThemeService);
   private readonly sceneConfigService = inject(SceneConfigService).sceneConfig;
   private readonly mugMaterialsMap: Map<keyof typeof MugParts, MeshPhysicalMaterial> = new Map();
 
   private scene = new Scene();
   private camera = new PerspectiveCamera();
   private renderer = new WebGLRenderer();
+
+  constructor() {
+    const {backgroundColorLight, backgroundColorDark} = this.sceneConfigService.renderer;
+    effect(() => {
+      this.renderer.setClearColor(this.themeService.isDarkMode ? backgroundColorDark : backgroundColorLight);
+    });
+  }
 
   async ngAfterViewInit(): Promise<void> {
     const {width, height} = this.getCanvasDimensions();
@@ -85,8 +94,7 @@ export class MugComponent implements AfterViewInit {
   private initRenderer(width: number, height: number): void {
     const {
       antialias,
-      localClippingEnabled,
-      backgroundColorLight
+      localClippingEnabled
     } = this.sceneConfigService.renderer;
     this.renderer = new WebGLRenderer({
       canvas: this.canvas.nativeElement,
@@ -95,7 +103,6 @@ export class MugComponent implements AfterViewInit {
 
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(width, height);
-    this.renderer.setClearColor(backgroundColorLight);
     this.renderer.localClippingEnabled = localClippingEnabled;
   }
 
