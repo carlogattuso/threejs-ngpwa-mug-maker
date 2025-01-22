@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, effect, ElementRef, HostListener, inject, Input, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, effect, ElementRef, inject, Input, ViewChild} from '@angular/core';
 import {
   AmbientLight,
   CanvasTexture,
@@ -134,7 +134,18 @@ export class MugComponent implements AfterViewInit {
       if (mug) mug.rotation.y += 0.01;
     }
 
+    this.resizeRenderer();
     this.renderer.render(this.scene, this.camera);
+  }
+
+  resizeRenderer() {
+    const {width, height} = this.getCanvasDimensions();
+    const newAspect = width / height;
+    if (this.camera.aspect !== newAspect) {
+      this.camera.aspect = newAspect;
+      this.camera.updateProjectionMatrix();
+      this.renderer.setSize(width, height);
+    }
   }
 
   private async initModel(): Promise<GLTF> {
