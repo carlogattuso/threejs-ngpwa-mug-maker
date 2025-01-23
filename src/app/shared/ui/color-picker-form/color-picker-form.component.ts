@@ -26,6 +26,7 @@ import {capitalizeFirstLetter} from "../../../utils/utils";
         <p-chip chip-list *ngFor="let part of mugColorsControls" styleClass="flex items-center p-2">
             <span class="flex items-center justify-center">
                 <p-colorPicker styleClass="caret-transparent select-none"
+                               appendTo="body"
                                [formControlName]="part.controlName"
                                (onChange)="emitColorChange(part.key, $event)">
                 </p-colorPicker>
