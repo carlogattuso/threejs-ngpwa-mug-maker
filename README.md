@@ -1,6 +1,6 @@
 # 🎨 3D Mug Customizer
 
-Experience the future of product customization with [MugMaker](https://mug-maker-9eb4b.web.app/), a proof-of-concept PWA that demonstrates the powerful integration of ThreeJS and Angular 18. Create stunning 3D mug designs in real-time with an intuitive interface powered by PrimeNG components. Engineered with enterprise-grade tools and following industry best practices, ensuring robust scalability and seamless deployment on Google Cloud Platform.
+Experience the future of product customization with [MugMaker](https://mug-maker-9eb4b.web.app/), a proof-of-concept PWA that demonstrates the powerful integration of ThreeJS and Angular 18. Create stunning 3D mug designs in real-time with an intuitive interface powered by PrimeNG components and Tailwind CSS styling. Engineered with enterprise-grade tools and following industry best practices, ensuring robust scalability and seamless deployment on Google Cloud Platform.
 
 <div align="center">
   <h4>Light Mode</h4>
@@ -39,6 +39,7 @@ MugMaker is an innovative proof-of-concept that bridges the gap between traditio
   - Angular 18
   - ThreeJS
   - PrimeNG
+  - Tailwind CSS
 
 - Infrastructure & Services
   - Google Cloud Platform
@@ -51,12 +52,9 @@ MugMaker is an innovative proof-of-concept that bridges the gap between traditio
 
 ### Prerequisites
 
-- Volta (recommended)
+- Volta (recommended) (see [Docs](https://volta.sh/))
 - npm/yarn
 - Node.js (v18+) (see [Angular compatibility versions](https://angular.dev/reference/versions))
-- Angular CLI (v18+)
-- ThreeJS (see [Docs](https://threejs.org/))
-- PrimeNG (v18+) (see [Docs](https://primeng.org/))
 
 ### Development Server
 
