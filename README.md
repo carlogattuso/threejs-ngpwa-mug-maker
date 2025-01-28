@@ -29,6 +29,10 @@ MugMaker is an innovative proof-of-concept that bridges the gap between traditio
   - Fully responsive mobile-first design
   - Progressive Web App (PWA) capabilities
 
+- Robust Unit Testing
+  - Comprehensive Karma test suite ensuring code quality and stability.
+  - Integrated into the CI pipeline for continuous testing during deployments.
+
 - Cloud-Native Deployment
   - Automated CI/CD workflows
   - Scalable infrastructure
