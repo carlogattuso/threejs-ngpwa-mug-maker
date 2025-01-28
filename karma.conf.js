@@ -42,7 +42,6 @@ module.exports = function (config) {
       ChromeHeadlessCI: {
         base: 'ChromeHeadless',
         singleRun: true,
-        watch: false,
         flags: [
           '--no-sandbox', // Keep this only if absolutely necessary and understand the security implications
           '--disable-gpu',   // *Essential* for running Chrome Headless without a GPU
