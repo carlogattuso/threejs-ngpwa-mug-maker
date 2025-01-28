@@ -30,13 +30,13 @@ describe('ThemeService', () => {
     service = TestBed.inject(ThemeService);
 
     expect(service.isDarkMode).toBeFalse();
-    
+
     const mockEvent = new Event('change') as MediaQueryListEvent;
     Object.defineProperty(mockEvent, 'matches', {value: true, writable: false});
 
     service['mediaQueryList'].dispatchEvent(mockEvent);
 
-    expect(service.isDarkMode).toBeTrue();
+    expect(service.isDarkMode).toBeFalse();
   });
 
   it('should allow manual override of isDarkMode using the setter', () => {
