@@ -64,7 +64,6 @@ export type FileValidationError = {
 
 export type ColorPickerControl = {
   controlName: string,
-  label: string,
   key: string
 }
 

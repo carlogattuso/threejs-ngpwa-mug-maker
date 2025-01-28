@@ -7,7 +7,6 @@ import {Button} from "primeng/button";
 import {ColorChangeEvent, ColorPickerControl} from "../../../app.types";
 import {DefaultMaterialColor, MugParts} from "../../../app.constants";
 import {FlexChipListComponent} from "../../../layout/flex-chip-list/flex-chip-list.component";
-import {capitalizeFirstLetter} from "../../../utils/utils";
 
 @Component({
   selector: 'app-color-picker-form',
@@ -32,7 +31,7 @@ import {capitalizeFirstLetter} from "../../../utils/utils";
                 </p-colorPicker>
             </span>
           <span class="mx-2 font-medium">
-                {{ part.label }}
+                {{ part.key }}
             </span>
         </p-chip>
       </app-flex-chip-list>
@@ -55,9 +54,8 @@ export class ColorPickerFormComponent {
 
   private initColorPickerControls(): ColorPickerControl[] {
     return Object.keys(MugParts).map((key) => ({
-      controlName: `${key.toLowerCase()}Color`,
-      label: capitalizeFirstLetter(key),
-      key,
+      controlName: `${key}Color`,
+      key
     }));
   }
 

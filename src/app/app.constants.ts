@@ -1,13 +1,13 @@
 export const MugParts = {
-  LOGO: 'Coffee-Mug_1',
-  BASE: 'Coffee-Mug_3',
-  BEVEL: 'Coffee-Mug_4',
-  INTERIOR: 'Coffee-Mug_5',
-  HANDLE: 'Coffee-Mug_6',
+  Logo: 'Coffee-Mug_1',
+  Base: 'Coffee-Mug_3',
+  Bevel: 'Coffee-Mug_4',
+  Interior: 'Coffee-Mug_5',
+  Handle: 'Coffee-Mug_6',
 } as const;
 
 export const SceneObjects = {
-  MUG: 'Coffee-Mug',
+  Mug: 'Coffee-Mug',
 } as const;
 
 export const MugModelPath = 'mug.glb';

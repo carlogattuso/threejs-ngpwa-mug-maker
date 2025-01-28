@@ -125,7 +125,7 @@ export class MugComponent implements AfterViewInit {
     requestAnimationFrame(this.animate);
 
     if (this.isMugRotating) {
-      const mug = this.scene.getObjectByName(SceneObjects.MUG);
+      const mug = this.scene.getObjectByName(SceneObjects.Mug);
       if (mug) mug.rotation.y += 0.01;
     }
 
@@ -167,7 +167,7 @@ export class MugComponent implements AfterViewInit {
   }
 
   public updateMugLogo(file: File): void {
-    const logoMaterial = this.mugMaterialsMap.get('LOGO');
+    const logoMaterial = this.mugMaterialsMap.get('Logo');
 
     if (logoMaterial) {
       readFileAsString(file, (result: string): void => {
