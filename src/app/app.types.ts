@@ -1,5 +1,11 @@
 import {MugParts} from "./app.constants";
 
+export type FileUtils = {
+  isFileSizeInvalid: (file: File) => FileValidationError;
+  isFileTypeInvalid: (file: File) => FileValidationError;
+  readFileAsString: (file: File, callback: (result: string) => void) => void;
+}
+
 export type SceneConfig = {
   lights: {
     color: number

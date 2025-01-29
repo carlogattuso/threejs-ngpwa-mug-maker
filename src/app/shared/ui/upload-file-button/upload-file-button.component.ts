@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Output, signal} from '@angular/core';
+import {Component, EventEmitter, Input, Output, signal} from '@angular/core';
 import {Button} from "primeng/button";
 import {Message} from "primeng/message";
 import {NgForOf} from "@angular/common";
@@ -14,7 +14,7 @@ import {isFileSizeInvalid, isFileTypeInvalid} from "../../../utils/file.utils";
     NgForOf
   ],
   template: `
-    <p-button [label]="uploadedFileLabel ?  uploadedFileLabel : 'Upload your design'" icon="pi pi-upload"
+    <p-button [label]="uploadedFileLabel ?  uploadedFileLabel : defaultLabel" icon="pi pi-upload"
               (click)="fileInput.click()" styleClass="w-full"/>
 
     <ng-container *ngFor="let text of errorMessages();">
@@ -33,9 +33,10 @@ export class UploadFileButtonComponent {
   protected readonly errorMessages = signal<string[]>([]);
   protected uploadedFileLabel: string | undefined;
 
+  @Input() defaultLabel: string = 'Upload your design';
   @Output() fileUploaded = new EventEmitter<File>();
 
-  validateFile(file: File): boolean {
+  private validateFile(file: File): boolean {
     this.errorMessages.set([]);
 
     const validations: FileValidationError[] = [
