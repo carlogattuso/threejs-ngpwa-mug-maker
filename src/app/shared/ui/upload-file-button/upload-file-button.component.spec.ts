@@ -1,4 +1,3 @@
-import * as fileUtilsOriginal from '../../../utils/file.utils';
 import {UploadFileButtonComponent} from './upload-file-button.component';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {ButtonModule} from 'primeng/button';
@@ -6,35 +5,11 @@ import {MessageModule} from 'primeng/message';
 import {FormsModule} from '@angular/forms';
 import {provideAnimations} from '@angular/platform-browser/animations';
 import {AllowedFileExtensions, InvalidFileSizeMsg, InvalidFileTypeMsg, MaxFileSizeInMB} from "../../../app.constants";
-import {FileUtils} from "../../../app.types";
 
 describe('UploadFileButtonComponent', () => {
-  const validFileSize = MaxFileSizeInMB * 1024 * 1024;
-  const allowedFileExtension = AllowedFileExtensions[0];
-
   let component: UploadFileButtonComponent;
   let fixture: ComponentFixture<UploadFileButtonComponent>;
   let compiled: HTMLElement;
-  let fileInput: HTMLInputElement;
-  let fileUtils: FileUtils;
-
-  const createMockFile = ({name, type, size = validFileSize}: {
-    name: string;
-    type: string;
-    size?: number;
-  }) => {
-    const mockFile = new File([''], name, {type});
-    Object.defineProperty(mockFile, 'size', {value: size, writable: false});
-    return mockFile;
-  };
-
-  const simulateFileUpload = (file: File) => {
-    const dataTransfer = new DataTransfer();
-    dataTransfer.items.add(file);
-    fileInput.files = dataTransfer.files;
-    fileInput?.dispatchEvent(new Event('change'));
-    fixture.detectChanges();
-  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -46,11 +21,6 @@ describe('UploadFileButtonComponent', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
     compiled = fixture.nativeElement as HTMLElement;
-    fileInput = compiled.querySelector('input[type="file"]') as HTMLInputElement;
-    fileUtils = {...fileUtilsOriginal};
-
-    spyOn(fileUtils, 'isFileSizeInvalid').and.callThrough();
-    spyOn(fileUtils, 'isFileTypeInvalid').and.callThrough();
   });
 
   describe('Initial State', () => {
@@ -66,22 +36,39 @@ describe('UploadFileButtonComponent', () => {
   });
 
   describe('File Upload Handling', () => {
+    let fileInput: HTMLInputElement;
+    const validFileSize = MaxFileSizeInMB * 1024 * 1024;
+    const allowedFileExtension = AllowedFileExtensions[0];
+
+    const createMockFile = ({name, type, size = validFileSize}: {
+      name: string;
+      type: string;
+      size?: number;
+    }) => {
+      const mockFile = new File([''], name, {type});
+      Object.defineProperty(mockFile, 'size', {value: size, writable: false});
+      return mockFile;
+    };
+
+    const simulateFileUpload = (file: File) => {
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(file);
+      fileInput.files = dataTransfer.files;
+      fileInput?.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+    };
+
+    beforeEach(() => {
+      spyOn(component.fileUploaded, 'emit');
+      fileInput = compiled.querySelector('input[type="file"]') as HTMLInputElement;
+    });
+
     it('should handle valid file upload correctly', () => {
       const validFileName = `test.${allowedFileExtension.split('/')[1]}`;
       const validFile = createMockFile({
         name: validFileName,
         type: allowedFileExtension
       });
-
-      fileUtils.isFileSizeInvalid = jasmine.createSpy().and.returnValue({
-        isValid: true,
-        message: InvalidFileSizeMsg,
-      });
-      fileUtils.isFileTypeInvalid = jasmine.createSpy().and.returnValue({
-        isValid: true,
-        message: InvalidFileTypeMsg,
-      });
-      spyOn(component.fileUploaded, 'emit');
 
       simulateFileUpload(validFile);
 
@@ -96,16 +83,6 @@ describe('UploadFileButtonComponent', () => {
         type: 'image/a1F',
         size: validFileSize + 1
       });
-
-      fileUtils.isFileSizeInvalid = jasmine.createSpy().and.returnValue({
-        isValid: false,
-        message: InvalidFileSizeMsg,
-      });
-      fileUtils.isFileTypeInvalid = jasmine.createSpy().and.returnValue({
-        isValid: false,
-        message: InvalidFileTypeMsg,
-      });
-      spyOn(component.fileUploaded, 'emit');
 
       simulateFileUpload(invalidFile);
 

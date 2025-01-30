@@ -3,7 +3,7 @@ import {FileValidationError} from "../app.types";
 
 export const isFileSizeInvalid = (file: File): FileValidationError => {
   return {
-    isValid: file.size < MaxFileSizeInMB * 1024 * 1024,
+    isValid: file.size <= MaxFileSizeInMB * 1024 * 1024,
     message: InvalidFileSizeMsg
   };
 }
