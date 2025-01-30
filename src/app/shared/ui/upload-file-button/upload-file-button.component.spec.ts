@@ -10,12 +10,31 @@ import {FileUtils} from "../../../app.types";
 
 describe('UploadFileButtonComponent', () => {
   const validFileSize = MaxFileSizeInMB * 1024 * 1024;
+  const allowedFileExtension = AllowedFileExtensions[0];
 
   let component: UploadFileButtonComponent;
   let fixture: ComponentFixture<UploadFileButtonComponent>;
   let compiled: HTMLElement;
   let fileInput: HTMLInputElement;
   let fileUtils: FileUtils;
+
+  const createMockFile = ({name, type, size = validFileSize}: {
+    name: string;
+    type: string;
+    size?: number;
+  }) => {
+    const mockFile = new File([''], name, {type});
+    Object.defineProperty(mockFile, 'size', {value: size, writable: false});
+    return mockFile;
+  };
+
+  const simulateFileUpload = (file: File) => {
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(file);
+    fileInput.files = dataTransfer.files;
+    fileInput?.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -34,71 +53,70 @@ describe('UploadFileButtonComponent', () => {
     spyOn(fileUtils, 'isFileTypeInvalid').and.callThrough();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  describe('Initial State', () => {
+    it('should create component', () => {
+      expect(component).toBeTruthy();
+    });
+
+    it('should display default label in upload button', () => {
+      const buttonLabel = compiled.querySelector('p-button .p-button-label')?.textContent;
+
+      expect(buttonLabel).toBe(component.defaultLabel);
+    });
   });
 
-  it('should display default label in upload button', () => {
-    expect(compiled.querySelector('p-button .p-button-label')?.textContent).toBe(component.defaultLabel);
-  });
+  describe('File Upload Handling', () => {
+    it('should handle valid file upload correctly', () => {
+      const validFileName = `test.${allowedFileExtension.split('/')[1]}`;
+      const validFile = createMockFile({
+        name: validFileName,
+        type: allowedFileExtension
+      });
 
-  it('should call emitLogoUploaded and update label when a valid input file is uploaded', () => {
-    const allowedFileExtension: string = AllowedFileExtensions[0];
-    const validFileName = 'test.'.concat(allowedFileExtension.split('/')[1]);
-    const mockFile = new File([''], validFileName, {type: allowedFileExtension});
-    Object.defineProperty(mockFile, 'size', {value: validFileSize, writable: false});
+      fileUtils.isFileSizeInvalid = jasmine.createSpy().and.returnValue({
+        isValid: true,
+        message: InvalidFileSizeMsg,
+      });
+      fileUtils.isFileTypeInvalid = jasmine.createSpy().and.returnValue({
+        isValid: true,
+        message: InvalidFileTypeMsg,
+      });
+      spyOn(component.fileUploaded, 'emit');
 
-    fileUtils.isFileSizeInvalid = jasmine.createSpy().and.returnValue({
-      isValid: true,
-      message: InvalidFileSizeMsg,
+      simulateFileUpload(validFile);
+
+      expect(component.fileUploaded.emit).toHaveBeenCalledWith(validFile);
+      expect(compiled.querySelector('p-button .p-button-label')?.textContent).toBe(validFileName);
+      expect(compiled.querySelectorAll('p-message').length).toBe(0);
     });
-    fileUtils.isFileTypeInvalid = jasmine.createSpy().and.returnValue({
-      isValid: true,
-      message: InvalidFileTypeMsg,
+
+    it('should handle invalid file upload correctly', () => {
+      const invalidFile = createMockFile({
+        name: 'test.a1F',
+        type: 'image/a1F',
+        size: validFileSize + 1
+      });
+
+      fileUtils.isFileSizeInvalid = jasmine.createSpy().and.returnValue({
+        isValid: false,
+        message: InvalidFileSizeMsg,
+      });
+      fileUtils.isFileTypeInvalid = jasmine.createSpy().and.returnValue({
+        isValid: false,
+        message: InvalidFileTypeMsg,
+      });
+      spyOn(component.fileUploaded, 'emit');
+
+      simulateFileUpload(invalidFile);
+
+      expect(component.fileUploaded.emit).not.toHaveBeenCalled();
+      expect(compiled.querySelector('p-button .p-button-label')?.textContent)
+        .toBe(component.defaultLabel);
+
+      const errorMessages = compiled.querySelectorAll('p-message');
+      expect(errorMessages.length).toBe(2);
+      expect(errorMessages[0].textContent).toContain(InvalidFileSizeMsg);
+      expect(errorMessages[1].textContent).toContain(InvalidFileTypeMsg);
     });
-    spyOn(component.fileUploaded, 'emit');
-
-    const dataTransfer = new DataTransfer();
-    dataTransfer.items.add(mockFile);
-    fileInput.files = dataTransfer.files;
-    fileInput?.dispatchEvent(new Event('change'));
-
-    fixture.detectChanges();
-
-    expect(component.fileUploaded.emit).toHaveBeenCalledWith(mockFile);
-    expect(compiled.querySelector('p-button .p-button-label')?.textContent).toBe(validFileName);
-    expect(compiled.querySelectorAll('p-message').length).toBe(0);
-  });
-
-  it('should show invalid file errors when an invalid input file input is uploaded', () => {
-    const forbiddenFileExtension: string = 'image/a1F';
-    const invalidFileName = 'test.'.concat(forbiddenFileExtension.split('/')[1]);
-    const mockFile = new File([''], invalidFileName, {type: forbiddenFileExtension});
-    Object.defineProperty(mockFile, 'size', {value: validFileSize + 1, writable: false});
-
-    fileUtils.isFileSizeInvalid = jasmine.createSpy().and.returnValue({
-      isValid: false,
-      message: InvalidFileSizeMsg,
-    });
-    fileUtils.isFileTypeInvalid = jasmine.createSpy().and.returnValue({
-      isValid: false,
-      message: InvalidFileTypeMsg,
-    });
-    spyOn(component.fileUploaded, 'emit');
-
-    const dataTransfer = new DataTransfer();
-    dataTransfer.items.add(mockFile);
-    fileInput.files = dataTransfer.files;
-    fileInput?.dispatchEvent(new Event('change'));
-
-    fixture.detectChanges();
-
-    expect(component.fileUploaded.emit).not.toHaveBeenCalled();
-    expect(compiled.querySelector('p-button .p-button-label')?.textContent).toBe(component.defaultLabel);
-
-    const errorMessages = compiled.querySelectorAll('p-message');
-    expect(errorMessages.length).toBe(2);
-    expect(errorMessages[0].textContent).toContain(InvalidFileSizeMsg);
-    expect(errorMessages[1].textContent).toContain(InvalidFileTypeMsg);
   });
 });

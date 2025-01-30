@@ -24,6 +24,6 @@ export const MaxFileSizeInMB = 10;
 
 export const AllowedFileExtensions = ['image/png'];
 
-export const InvalidFileSizeMsg = `Invalid file size: ${MaxFileSizeInMB} MB`
+export const InvalidFileSizeMsg = `Invalid file size: ${MaxFileSizeInMB} MB`;
 
-export const InvalidFileTypeMsg = `Invalid file type: ${AllowedFileExtensions}`
+export const InvalidFileTypeMsg = `Invalid file type: ${AllowedFileExtensions}`;

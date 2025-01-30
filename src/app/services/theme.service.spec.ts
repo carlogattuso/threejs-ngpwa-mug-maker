@@ -2,48 +2,58 @@ import {TestBed} from '@angular/core/testing';
 import {ThemeService} from './theme.service';
 
 describe('ThemeService', () => {
-  let service: ThemeService;
+  let themeService: ThemeService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(ThemeService);
+    themeService = TestBed.inject(ThemeService);
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
+  describe('Service Initialization', () => {
+    it('should create service instance', () => {
+      expect(themeService).toBeTruthy();
+    });
+
+    it('should initialize dark mode based on system preference', () => {
+      const systemDarkModePreference = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+      expect(themeService.isDarkMode).toBe(systemDarkModePreference);
+    });
   });
 
-  it('should initialize with the correct dark mode state', () => {
-    const isSystemDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    expect(service.isDarkMode).toBe(isSystemDarkMode);
+  describe('System Theme Changes', () => {
+    it('should update theme when system preference changes', () => {
+      const mockMediaQueryList = {
+        matches: false,
+        addEventListener: jasmine.createSpy('addEventListener'),
+        removeEventListener: jasmine.createSpy('removeEventListener'),
+        dispatchEvent: jasmine.createSpy('dispatchEvent'),
+      };
+
+      spyOn(window, 'matchMedia').and.returnValue(mockMediaQueryList as any);
+      themeService = TestBed.inject(ThemeService);
+
+      expect(themeService.isDarkMode).toBeFalse();
+
+      const systemThemeChangeEvent = new Event('change') as MediaQueryListEvent;
+      Object.defineProperty(systemThemeChangeEvent, 'matches', {
+        value: true,
+        writable: false
+      });
+
+      themeService['mediaQueryList'].dispatchEvent(systemThemeChangeEvent);
+
+      expect(themeService.isDarkMode).toBeTrue();
+    });
   });
 
-  it('should update isDarkMode when media query event fires', () => {
-    const mockMediaQueryList = {
-      matches: false,
-      addEventListener: jasmine.createSpy('addEventListener'),
-      removeEventListener: jasmine.createSpy('removeEventListener'),
-      dispatchEvent: jasmine.createSpy('dispatchEvent'),
-    };
+  describe('Manual Theme Control', () => {
+    it('should allow manual theme switching', () => {
+      themeService.isDarkMode = true;
+      expect(themeService.isDarkMode).toBeTrue();
 
-    spyOn(window, 'matchMedia').and.returnValue(mockMediaQueryList as any);
-    service = TestBed.inject(ThemeService);
-
-    expect(service.isDarkMode).toBeFalse();
-    
-    const mockEvent = new Event('change') as MediaQueryListEvent;
-    Object.defineProperty(mockEvent, 'matches', {value: true, writable: false});
-
-    service['mediaQueryList'].dispatchEvent(mockEvent);
-
-    expect(service.isDarkMode).toBeTrue();
-  });
-
-  it('should allow manual override of isDarkMode using the setter', () => {
-    service.isDarkMode = true;
-    expect(service.isDarkMode).toBeTrue();
-
-    service.isDarkMode = false;
-    expect(service.isDarkMode).toBeFalse();
+      themeService.isDarkMode = false;
+      expect(themeService.isDarkMode).toBeFalse();
+    });
   });
 });
