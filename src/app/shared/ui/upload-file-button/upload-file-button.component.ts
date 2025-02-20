@@ -14,7 +14,7 @@ import {isFileSizeInvalid, isFileTypeInvalid} from "../../../utils/file.utils";
     NgForOf
   ],
   template: `
-    <p-button [label]="uploadedFileLabel ?  uploadedFileLabel : defaultLabel" icon="pi pi-upload"
+    <p-button [label]="label" icon="pi pi-upload"
               (click)="fileInput.click()" styleClass="w-full"/>
 
     <ng-container *ngFor="let text of errorMessages();">
@@ -30,10 +30,9 @@ import {isFileSizeInvalid, isFileTypeInvalid} from "../../../utils/file.utils";
   `
 })
 export class UploadFileButtonComponent {
-  protected readonly errorMessages = signal<string[]>([]);
-  protected uploadedFileLabel: string | undefined;
+  errorMessages = signal<string[]>([]);
 
-  @Input() defaultLabel: string = 'Upload your design';
+  @Input() label: string = 'Upload your design';
   @Output() fileUploaded = new EventEmitter<File>();
 
   private validateFile(file: File): boolean {
@@ -62,7 +61,7 @@ export class UploadFileButtonComponent {
     if (!file) return;
 
     if (this.validateFile(file)) {
-      this.uploadedFileLabel = file.name;
+      this.label = file.name;
       this.fileUploaded.emit(file);
     }
   }

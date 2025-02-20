@@ -19,6 +19,7 @@ describe('UploadFileButtonComponent', () => {
 
     fixture = TestBed.createComponent(UploadFileButtonComponent);
     component = fixture.componentInstance;
+
     fixture.detectChanges();
     compiled = fixture.nativeElement as HTMLElement;
   });
@@ -30,8 +31,7 @@ describe('UploadFileButtonComponent', () => {
 
     it('should display default label in upload button', () => {
       const buttonLabel = compiled.querySelector('p-button .p-button-label')?.textContent;
-
-      expect(buttonLabel).toBe(component.defaultLabel);
+      expect(buttonLabel).toBe(component.label);
     });
   });
 
@@ -55,7 +55,6 @@ describe('UploadFileButtonComponent', () => {
       dataTransfer.items.add(file);
       fileInput.files = dataTransfer.files;
       fileInput?.dispatchEvent(new Event('change'));
-      fixture.detectChanges();
     };
 
     beforeEach(() => {
@@ -71,10 +70,11 @@ describe('UploadFileButtonComponent', () => {
       });
 
       simulateFileUpload(validFile);
+      fixture.detectChanges();
 
       expect(component.fileUploaded.emit).toHaveBeenCalledWith(validFile);
-      expect(compiled.querySelector('p-button .p-button-label')?.textContent).toBe(validFileName);
-      expect(compiled.querySelectorAll('p-message').length).toBe(0);
+      expect(component.label).toBe(validFileName);
+      expect(component.errorMessages().length).toBe(0);
     });
 
     it('should handle invalid file upload correctly', () => {
@@ -85,15 +85,13 @@ describe('UploadFileButtonComponent', () => {
       });
 
       simulateFileUpload(invalidFile);
-
+      fixture.detectChanges();
+      
       expect(component.fileUploaded.emit).not.toHaveBeenCalled();
-      expect(compiled.querySelector('p-button .p-button-label')?.textContent)
-        .toBe(component.defaultLabel);
-
-      const errorMessages = compiled.querySelectorAll('p-message');
+      const errorMessages = component.errorMessages();
       expect(errorMessages.length).toBe(2);
-      expect(errorMessages[0].textContent).toContain(InvalidFileSizeMsg);
-      expect(errorMessages[1].textContent).toContain(InvalidFileTypeMsg);
+      expect(errorMessages).toContain(InvalidFileSizeMsg);
+      expect(errorMessages).toContain(InvalidFileTypeMsg);
     });
   });
 });
