@@ -46,9 +46,9 @@ export class AppComponent implements OnInit {
 
   @ViewChild(MugComponent) mugComponent!: MugComponent;
 
-  protected isSmallScreen = false;
-  protected sidebarState = SidebarState.Closed;
-  protected isMugRotating = true;
+  isSmallScreen = false;
+  sidebarState = SidebarState.Closed;
+  isMugRotating = true;
 
   private readonly breakpointObserver = inject(BreakpointObserver);
 
@@ -61,7 +61,7 @@ export class AppComponent implements OnInit {
     });
   }
 
-  protected toggleSidebar(): void {
+  toggleSidebar(): void {
     this.sidebarState = this.sidebarState === SidebarState.Closed ? SidebarState.Open : SidebarState.Closed;
   }
 
