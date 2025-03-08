@@ -23,27 +23,16 @@ describe('ThemeService', () => {
 
   describe('System Theme Changes', () => {
     it('should update theme when system preference changes', () => {
-      const mockMediaQueryList = {
-        matches: false,
-        addEventListener: jasmine.createSpy('addEventListener'),
-        removeEventListener: jasmine.createSpy('removeEventListener'),
-        dispatchEvent: jasmine.createSpy('dispatchEvent'),
-      };
-
-      spyOn(window, 'matchMedia').and.returnValue(mockMediaQueryList as any);
-      themeService = TestBed.inject(ThemeService);
-
-      expect(themeService.isDarkMode).toBeFalse();
+      const systemDarkModePreference = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
       const systemThemeChangeEvent = new Event('change') as MediaQueryListEvent;
       Object.defineProperty(systemThemeChangeEvent, 'matches', {
-        value: true,
+        value: !systemDarkModePreference,
         writable: false
       });
 
       themeService['mediaQueryList'].dispatchEvent(systemThemeChangeEvent);
-
-      expect(themeService.isDarkMode).toBeTrue();
+      expect(themeService.isDarkMode).toBe(!systemDarkModePreference);
     });
   });
 
