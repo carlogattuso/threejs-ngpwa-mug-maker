@@ -1,7 +1,7 @@
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {AppComponent} from './app.component'; // Import your AppComponent
 import {provideAnimations} from '@angular/platform-browser/animations';
-import {SidebarState} from "./app.types";
+import {ColorChangeEvent, SidebarState} from "./app.types";
 import {BreakpointObserver} from "@angular/cdk/layout";
 import {of} from "rxjs";
 
@@ -101,5 +101,27 @@ describe('AppComponent', () => {
 
       expect(component.sidebarState).toBe(SidebarState.Closed);
     }));
+  });
+
+  describe('Color Change event', () => {
+    it('should update mug color when onColorChanged is called', () => {
+      const mockColorEvent: ColorChangeEvent = { key: 'key', color: '#FF5733' };
+      component.mugComponent = jasmine.createSpyObj('MugComponent', ['updateMugColor']);
+
+      component.onColorChanged(mockColorEvent);
+
+      expect(component.mugComponent.updateMugColor).toHaveBeenCalledWith(mockColorEvent);
+    });
+  });
+
+  describe('File Upload event', () => {
+    it('should update mug logo when onFileUploaded is called', () => {
+      const mockFile = new File(['dummy content'], 'logo.png', { type: 'image/png' });
+      component.mugComponent = jasmine.createSpyObj('MugComponent', ['updateMugLogo']);
+
+      component.onFileUploaded(mockFile);
+
+      expect(component.mugComponent.updateMugLogo).toHaveBeenCalledWith(mockFile);
+    });
   });
 });
