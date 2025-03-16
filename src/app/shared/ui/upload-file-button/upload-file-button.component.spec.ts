@@ -1,8 +1,5 @@
 import {UploadFileButtonComponent} from './upload-file-button.component';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {ButtonModule} from 'primeng/button';
-import {MessageModule} from 'primeng/message';
-import {FormsModule} from '@angular/forms';
 import {provideAnimations} from '@angular/platform-browser/animations';
 import {AllowedFileExtensions, InvalidFileSizeMsg, InvalidFileTypeMsg, MaxFileSizeInMB} from "../../../app.constants";
 
@@ -13,7 +10,7 @@ describe('UploadFileButtonComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [UploadFileButtonComponent, ButtonModule, MessageModule, FormsModule],
+      imports: [UploadFileButtonComponent],
       providers: [provideAnimations()],
     }).compileComponents();
 
@@ -40,6 +37,8 @@ describe('UploadFileButtonComponent', () => {
     const validFileSize = MaxFileSizeInMB * 1024 * 1024;
     const allowedFileExtension = AllowedFileExtensions[0];
 
+    const validFileName = `test.${allowedFileExtension.split('/')[1]}`;
+
     const createMockFile = ({name, type, size = validFileSize}: {
       name: string;
       type: string;
@@ -62,8 +61,7 @@ describe('UploadFileButtonComponent', () => {
       fileInput = compiled.querySelector('input[type="file"]') as HTMLInputElement;
     });
 
-    it('should handle valid file upload correctly', () => {
-      const validFileName = `test.${allowedFileExtension.split('/')[1]}`;
+    it('should handle valid file upload', () => {
       const validFile = createMockFile({
         name: validFileName,
         type: allowedFileExtension
@@ -77,7 +75,7 @@ describe('UploadFileButtonComponent', () => {
       expect(component.errorMessages().length).toBe(0);
     });
 
-    it('should handle invalid file upload correctly', () => {
+    it('should handle invalid file upload', () => {
       const invalidFile = createMockFile({
         name: 'test.a1F',
         type: 'image/a1F',
@@ -86,12 +84,54 @@ describe('UploadFileButtonComponent', () => {
 
       simulateFileUpload(invalidFile);
       fixture.detectChanges();
-      
+
       expect(component.fileUploaded.emit).not.toHaveBeenCalled();
       const errorMessages = component.errorMessages();
       expect(errorMessages.length).toBe(2);
       expect(errorMessages).toContain(InvalidFileSizeMsg);
       expect(errorMessages).toContain(InvalidFileTypeMsg);
+    });
+
+    it('should handle invalid file uploads with specific errors', () => {
+      const invalidSizeFile = createMockFile({
+        name: validFileName,
+        type: allowedFileExtension,
+        size: validFileSize + 1,
+      });
+
+      simulateFileUpload(invalidSizeFile);
+      fixture.detectChanges();
+
+      expect(component.fileUploaded.emit).not.toHaveBeenCalled();
+      let errorMessages = component.errorMessages();
+      expect(errorMessages.length).toBe(1);
+      expect(errorMessages).toContain(InvalidFileSizeMsg);
+
+      component.errorMessages.set([]);
+
+      const invalidTypeFile = createMockFile({
+        name: 'test.a1F',
+        type: 'image/a1F',
+        size: validFileSize,
+      });
+
+      simulateFileUpload(invalidTypeFile);
+      fixture.detectChanges();
+
+      expect(component.fileUploaded.emit).not.toHaveBeenCalled();
+      errorMessages = component.errorMessages();
+      expect(errorMessages.length).toBe(1);
+      expect(errorMessages).toContain(InvalidFileTypeMsg);
+    });
+
+    it('should handle null file upload correctly', () => {
+      fileInput?.dispatchEvent(new Event('change'));
+
+      fixture.detectChanges();
+
+      expect(component.fileUploaded.emit).not.toHaveBeenCalled();
+      const errorMessages = component.errorMessages();
+      expect(errorMessages.length).toBe(0);
     });
   });
 });
