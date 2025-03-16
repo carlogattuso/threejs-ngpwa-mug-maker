@@ -46,13 +46,6 @@ module.exports = function (config) {
       }
     },
     customLaunchers: {
-      ChromeHeaded: {
-        base: 'Chrome',
-        flags: [
-          '--no-sandbox', // Keep this only if absolutely necessary and understand the security implications
-          '--remote-debugging-port=9222' // Or any other port you choose
-        ]
-      },
       ChromeHeadlessCI: {
         base: 'ChromeHeadless',
         singleRun: true,
@@ -64,7 +57,7 @@ module.exports = function (config) {
       }
     },
     reporters: ['progress', 'kjhtml'],
-    browsers: ['ChromeHeaded'], // Or ['ChromeHeadlessCI'] as needed
+    browsers: ['Chrome'], // Or ['ChromeHeadlessCI'] as needed
     restartOnFileChange: true
   });
 };
